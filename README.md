@@ -105,7 +105,7 @@ feature/*   → funcionalidades em desenvolvimento
 
 ## Progresso
 
-Acompanhe as tarefas e o progresso do time na aba [Projects](../../projects) do repositório.
+Acompanhe as tarefas e o progresso do time na aba [Projects](https://github.com/users/estebanalfsa/projects/2/views/1) do repositório.
 
 ---
 
