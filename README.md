@@ -54,31 +54,6 @@ Acesse:
 - Admin Django: http://localhost:8000/admin
 
 ---
-
-## Estrutura do Projeto
-
-```
-festa-de-ouro/
-│
-├── backend/              # Django REST API
-│   ├── apps/
-│   │   ├── users/        # Autenticação e perfis
-│   │   ├── posts/        # Publicações de eventos
-│   │   └── comments/     # Comentários
-│   ├── requirements.txt
-│   └── Dockerfile
-│
-├── frontend/             # React App
-│   ├── src/
-│   │   ├── pages/        # Login, Home, Perfil
-│   │   ├── components/   # Navbar, Cards, Formulários
-│   │   └── services/     # Chamadas à API
-│   ├── package.json
-│   └── Dockerfile
-│
-├── docker-compose.yml
-├── .env.example
-└── README.md
 ```
 
 ---
