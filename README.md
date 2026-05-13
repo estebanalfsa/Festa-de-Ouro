@@ -97,9 +97,9 @@ feature/*   → funcionalidades em desenvolvimento
 
 | Nome | Função |
 |---|---|
-| [Carlos Fabricio Benites Rodriguez] | Backend — Autenticação e usuários |
-| [Gruner Antonio Sánchez Morales] | Backend — Posts, categorias e API |
-| [Jose Esteba Andres Alfaro Sánchez] | Frontend — Login, registro e navegação |
+| Carlos Fabricio Benites Rodriguez | Backend — Autenticação e usuários |
+| Gruner Antonio Sánchez Morales| Backend — Posts, categorias e API |
+| Jose Esteba Andres Alfaro Sánchez | Frontend — Login, registro e navegação |
 
 ---
 
