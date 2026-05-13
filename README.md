@@ -54,11 +54,6 @@ Acesse:
 - Admin Django: http://localhost:8000/admin
 
 ---
-```
-
----
-
-## Branches
 
 ```
 main        → código estável e funcional
