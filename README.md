@@ -55,7 +55,7 @@ Acesse:
 
 ---
 
-## 🗂️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 festa-de-ouro/
@@ -83,7 +83,7 @@ festa-de-ouro/
 
 ---
 
-## 🌿 Branches
+## Branches
 
 ```
 main        → código estável e funcional
@@ -93,7 +93,7 @@ feature/*   → funcionalidades em desenvolvimento
 
 ---
 
-## 👥 Integrantes
+## Integrantes
 
 | Nome | Função |
 |---|---|
@@ -103,12 +103,12 @@ feature/*   → funcionalidades em desenvolvimento
 
 ---
 
-## 📋 Progresso
+## Progresso
 
 Acompanhe as tarefas e o progresso do time na aba [Projects](../../projects) do repositório.
 
 ---
 
-## 📄 Licença
+## Licença
 
 Este projeto foi desenvolvido para fins acadêmicos.
