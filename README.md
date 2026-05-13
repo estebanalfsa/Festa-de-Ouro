@@ -4,21 +4,20 @@
 
 ---
 
-## 📌 Sobre o Projeto
+## Sobre o Projeto
 
 **Festa de Ouro** é uma aplicação web do tipo fórum onde qualquer usuário cadastrado pode publicar e visualizar eventos da comunidade. A ideia é centralizar em um só lugar todos os eventos locais, sejam eles sociais, esportivos, culturais ou gastronômicos.
 
 ### Funcionalidades principais
-- 🔐 Cadastro e login de usuários
-- 👤 Perfil pessoal com histórico de publicações
-- 📢 Criação de posts de eventos com categoria, data e descrição
-- 🗂️ Feed principal com filtro por categoria
-- 💬 Comentários nos eventos (em breve)
-- ❤️ Marcar interesse em eventos (em breve)
+- Cadastro e login de usuários
+- Perfil pessoal com histórico de publicações
+- Criação de posts de eventos com categoria, data e descrição
+- Feed principal com filtro por categoria
+
 
 ---
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 | Camada | Tecnologia |
 |---|---|
@@ -30,13 +29,11 @@
 
 ---
 
-## 🚀 Como rodar o projeto
+## Como rodar o projeto
 
 ### Pré-requisitos
 - [Docker](https://www.docker.com/) instalado
 - [Docker Compose](https://docs.docker.com/compose/) instalado
-- [Git](https://git-scm.com/) instalado
-
 ### Passos
 
 ```bash
@@ -100,10 +97,9 @@ feature/*   → funcionalidades em desenvolvimento
 
 | Nome | Função |
 |---|---|
-| [Integrante 1] | Backend — Autenticação e usuários |
-| [Integrante 2] | Backend — Posts, categorias e API |
-| [Integrante 3] | Frontend — Login, registro e navegação |
-| [Integrante 4] | Frontend — Feed principal e cards de eventos |
+| [Carlos Fabricio Benites Rodriguez] | Backend — Autenticação e usuários |
+| [Gruner Antonio Sánchez Morales] | Backend — Posts, categorias e API |
+| [Jose Esteba Andres Alfaro Sánchez] | Frontend — Login, registro e navegação |
 
 ---
 
