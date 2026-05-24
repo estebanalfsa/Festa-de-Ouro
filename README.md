@@ -38,7 +38,7 @@
 
 ```bash
 # 1. Clonar o repositório
-git clone https://github.com/SEU_USUARIO/festa-de-ouro.git
+git clone https://github.com/estebanalfsa/Festa-de-Ouro
 cd festa-de-ouro
 
 # 2. Copiar as variáveis de ambiente
@@ -65,11 +65,11 @@ feature/*   → funcionalidades em desenvolvimento
 
 ## Integrantes
 
-| Nome | Função |
+| Nome | 
 |---|---|
-| Carlos Fabricio Benites Rodriguez | Backend — Autenticação e usuários |
-| Gruner Antonio Sánchez Morales| Backend — Posts, categorias e API |
-| Jose Esteba Andres Alfaro Sánchez | Frontend — Login, registro, navegação e feed principal e cards de eventos |
+| Carlos Fabricio Benites Rodriguez |
+| Gruner Antonio Sánchez Morales |
+| Jose Esteba Andres Alfaro Sánchez |
 
 ---
 
