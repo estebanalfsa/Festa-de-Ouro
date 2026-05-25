@@ -18,30 +18,30 @@ function Login() {
             {/* COLUMNA IZQUIERDA */}
             <div className="hidden md:flex w-1/2 bg-slate-900 flex-col justify-between p-12">
 
-                {/* Logo */}
+                {/* LOGO PS  */}
                 <div>
-                    <h1 className="text-white text-4xl font-bold">🎉 Festa de <span className="text-amber-400">Ouro</span></h1>
+                    <h1 className="text-white text-4xl font-bold">Festa de <span className="text-amber-400">Ouro</span></h1>
                     <p className="text-slate-300 mt-2 text-lg">A sua plataforma de eventos</p>
                 </div>
 
-                {/* Info central */}
+                {/* INFORMACION CENTRAl */}
                 <div className="space-y-8">
                     <div className="flex items-start gap-4">
-                        <span className="text-4xl">📢</span>
+                        <span className="text-4xl"></span>
                         <div>
                             <h3 className="text-white font-semibold text-xl">Publique seus eventos</h3>
                             <p className="text-slate-300 mt-1">Compartilhe festas, churrascos, aniversários e muito mais com a comunidade.</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-4">
-                        <span className="text-4xl">🗂️</span>
+                        <span className="text-4xl"></span>
                         <div>
                             <h3 className="text-white font-semibold text-xl">Filtre por categoria</h3>
                             <p className="text-slate-300 mt-1">Encontre eventos esportivos, sociais, culturais e gastronômicos perto de você.</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-4">
-                        <span className="text-4xl">👥</span>
+                        <span className="text-4xl"></span>
                         <div>
                             <h3 className="text-white font-semibold text-xl">Conecte-se com pessoas</h3>
                             <p className="text-slate-300 mt-1">Comente, demonstre interesse e participe dos eventos da sua comunidade.</p>
@@ -53,13 +53,13 @@ function Login() {
                 <p className="text-slate-400 text-sm">© 2026 Festa de Ouro · Todos os direitos reservados</p>
             </div>
 
-            {/* COLUMNA DERECHA — Login */}
+            {/* COLUMNA DERECHA EL Login */}
             <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50 p-8">
                 <div className="w-full max-w-md">
 
                     {/* Título */}
                     <div className="mb-8">
-                        <h2 className="text-3xl font-bold text-gray-800">Bem-vindo de volta 👋</h2>
+                        <h2 className="text-3xl font-bold text-gray-800">Bem-vindo de volta</h2>
                         <p className="text-gray-500 mt-2">Entre na sua conta para continuar</p>
                     </div>
 
