@@ -1,4 +1,5 @@
 function Register() {
-  return <div>Register</div>
+  return <div>AQUI FALTA LA PAGINA DE REGISTRO</div>
+
 }
 export default Register
