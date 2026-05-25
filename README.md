@@ -66,7 +66,7 @@ feature/*   → funcionalidades em desenvolvimento
 ## Integrantes
 
 | Nome | 
-|---|---|
+|---|
 | Carlos Fabricio Benites Rodriguez |
 | Gruner Antonio Sánchez Morales |
 | Jose Esteba Andres Alfaro Sánchez |
