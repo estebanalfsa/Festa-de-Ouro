@@ -18,13 +18,13 @@ function Login() {
             {/* COLUMNA IZQUIERDA */}
             <div className="hidden md:flex w-1/2 bg-slate-900 flex-col justify-between p-12">
 
-                {/* Logo */}
+                {/* LOGO PS  */}
                 <div>
                     <h1 className="text-white text-4xl font-bold">Festa de <span className="text-amber-400">Ouro</span></h1>
                     <p className="text-slate-300 mt-2 text-lg">A sua plataforma de eventos</p>
                 </div>
 
-                {/* Info central */}
+                {/* INFORMACION CENTRAl */}
                 <div className="space-y-8">
                     <div className="flex items-start gap-4">
                         <span className="text-4xl"></span>
@@ -53,7 +53,7 @@ function Login() {
                 <p className="text-slate-400 text-sm">© 2026 Festa de Ouro · Todos os direitos reservados</p>
             </div>
 
-            {/* COLUMNA DERECHA — Login */}
+            {/* COLUMNA DERECHA EL Login */}
             <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50 p-8">
                 <div className="w-full max-w-md">
 
