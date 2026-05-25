@@ -45,7 +45,7 @@ cd festa-de-ouro
 cp .env.example .env
 
 # 3. Subir os containers
-docker-compose up --build
+sudo docker compose -f docker-compose.yml up
 ```
 
 Acesse:
