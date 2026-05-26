@@ -6,11 +6,14 @@ export default function User() {
 
   const userProfile = {
     name: 'Esteban Alfaro',
+    surname: 'Silva',
+    nickname: 'Teba',
     username: '@esteban_alfaro',
     bio: 'Organizador de eventos comunitários, churrascos e encontros musicais. Aqui ficam os meus eventos, favoritos e o que estou a acompanhar em Festa de Ouro.',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
     coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
     city: 'Lisboa, Portugal',
+    republic: 'República Solar do Ouro',
     joinedAt: 'Membro desde Janeiro 2025',
     eventsCreatedCount: 14,
     attendingCount: 32,
@@ -137,60 +140,125 @@ export default function User() {
                 <p className="mt-1 text-sm sm:text-base text-slate-200">{userProfile.username} · {userProfile.city}</p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <button className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100 transition">
-                  Editar perfil
-                </button>
-                <button className="rounded-xl border border-white/20 bg-slate-950/40 px-4 py-2 text-sm font-semibold text-white backdrop-blur hover:bg-slate-950/60 transition">
-                  Partilhar perfil
-                </button>
-              </div>
             </div>
           </div>
 
           <div className="px-5 sm:px-8 pb-8">
-            <div className="-mt-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-                <img
-                  src={userProfile.avatar}
-                  alt={userProfile.name}
-                  className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover ring-4 ring-white shadow-lg"
-                />
+            <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                  <img
+                    src={userProfile.avatar}
+                    alt={userProfile.name}
+                    className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover ring-4 ring-white shadow-lg"
+                  />
 
-                <div className="pb-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-2xl font-black text-slate-900">{userProfile.name}</h3>
-                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                      Disponível para eventos
-                    </span>
+                  <div className="pb-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-2xl font-black text-slate-900">{userProfile.name} {userProfile.surname}</h3>
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        Disponível para eventos
+                      </span>
+                    </div>
+                    <p className="mt-1 max-w-2xl text-sm sm:text-base leading-relaxed text-slate-600">{userProfile.bio}</p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                      <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">Apodo: {userProfile.nickname}</span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">Apellidos: {userProfile.surname}</span>
+                      <span className="rounded-full bg-amber-50 px-3 py-1 font-medium text-amber-700">{userProfile.republic}</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                      <span className="inline-flex items-center gap-2">
+                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {userProfile.city}
+                      </span>
+                      <span className="hidden sm:inline text-slate-300">•</span>
+                      <span>{userProfile.joinedAt}</span>
+                    </div>
                   </div>
-                  <p className="mt-1 max-w-2xl text-sm sm:text-base leading-relaxed text-slate-600">{userProfile.bio}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                    <span className="inline-flex items-center gap-2">
-                      <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </div>
+
+                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {stats.map((stat) => (
+                    <div key={stat.label} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center">
+                      <div className="text-2xl font-black text-slate-900">{stat.value}</div>
+                      <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Ações do perfil</p>
+                  <div className="mt-4 grid grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      aria-label="Editar perfil"
+                      title="Editar perfil"
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L7.31 19.342a4.5 4.5 0 01-1.897 1.13l-3.12.781.782-3.121a4.5 4.5 0 011.13-1.897l12.656-12.748z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.5 7.5l-3-3" />
                       </svg>
-                      {userProfile.city}
-                    </span>
-                    <span className="hidden sm:inline text-slate-300">•</span>
-                    <span>{userProfile.joinedAt}</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Partilhar perfil"
+                      title="Partilhar perfil"
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-100"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7.5 12.75l9-5.25M7.5 11.25l9 5.25" />
+                        <circle cx="6" cy="12" r="2" strokeWidth="2" />
+                        <circle cx="18" cy="6" r="2" strokeWidth="2" />
+                        <circle cx="18" cy="18" r="2" strokeWidth="2" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Mais opções"
+                      title="Mais opções"
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-transparent text-slate-600 shadow-sm transition hover:border-slate-400 hover:text-slate-800"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="5" r="1.8" />
+                        <circle cx="12" cy="12" r="1.8" />
+                        <circle cx="12" cy="19" r="1.8" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:min-w-[540px]">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center">
-                    <div className="text-2xl font-black text-slate-900">{stat.value}</div>
-                    <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">{stat.label}</div>
+              <div className="space-y-6">
+                <div className="rounded-3xl border border-slate-200 bg-slate-900 p-5 shadow-sm text-white">
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="text-lg font-bold">Resumo rápido</h4>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">Perfil</span>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
-              <aside className="lg:col-span-4 space-y-6">
+                  <div className="mt-4 grid gap-3">
+                    <div className="rounded-2xl bg-white/10 px-4 py-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-300">Estado</p>
+                      <p className="mt-1 text-sm font-semibold text-white">Disponível para eventos</p>
+                    </div>
+                    <div className="rounded-2xl bg-white/10 px-4 py-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-300">Cidade</p>
+                      <p className="mt-1 text-sm font-semibold text-white">{userProfile.city}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white/10 px-4 py-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-300">República</p>
+                      <p className="mt-1 text-sm font-semibold text-white">{userProfile.republic}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white/10 px-4 py-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-300">Membro desde</p>
+                      <p className="mt-1 text-sm font-semibold text-white">{userProfile.joinedAt}</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-slate-900">Resumo do perfil</h4>
@@ -212,7 +280,11 @@ export default function User() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
 
+            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
+              <aside className="lg:col-span-4 space-y-6">
                 <div className="rounded-3xl border border-slate-200 bg-slate-900 p-5 shadow-sm text-white">
                   <h4 className="text-lg font-bold">Próximo passo sugerido</h4>
                   <p className="mt-2 text-sm leading-relaxed text-slate-300">
