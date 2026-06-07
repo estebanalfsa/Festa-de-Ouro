@@ -53,14 +53,11 @@ export default function Senha() {
           {!enviado ? (
             <>
               <div className="mb-8">
-                <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl"></span>
                 </div>
                 <h2 className="text-3xl font-bold text-gray-800">Esqueceu a senha?</h2>
                 <p className="text-gray-500 mt-2">
                   Sem problema! Informe seu e-mail cadastrado e enviaremos um link para você criar uma nova senha.
                 </p>
-              </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
