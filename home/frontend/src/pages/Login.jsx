@@ -85,9 +85,9 @@ function Login() {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Senha
                                 </label>
-                                <a href="#" className="text-sm text-orange-500 hover:underline">
+                                <Link to="/senha" className="text-sm text-orange-500 hover:underline">
                                     Esqueceu a senha?
-                                </a>
+                                </Link>
                             </div>
                             <input
                                 type="password"
