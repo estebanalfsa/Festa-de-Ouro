@@ -1,5 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
+
+import img1 from '../assets/img_reg1.jpeg'
+import img2 from '../assets/img_reg2.jpeg'
+import img3 from '../assets/img_reg3.jpg'
+import img4 from '../assets/img_reg4.jpeg'
+import img5 from '../assets/img_reg5.jpg'
+import img6 from '../assets/img_reg6.jpg'
+import img7 from '../assets/img_reg7.jpg'
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -36,35 +45,44 @@ function Register() {
     <div className="min-h-screen flex">
 
       {/* COLUNA ESQUERDA */}
-      <div className="hidden md:flex w-1/2 bg-slate-900 flex-col justify-between p-12">
-        <div>
-          <h1 className="text-white text-4xl font-bold">Festa de <span className="text-amber-400">Ouro</span></h1>
+      <div className="hidden md:flex w-1/2 bg-slate-900 flex-col justify-between py-10 px-8">
+
+        {/* Título centrado arriba */}
+        <div className="text-center">
+          <h1 className="text-white font-bold tracking-tight w-full" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)' }}>
+            Festa de <span className="text-amber-400">Ouro</span>
+          </h1>
           <p className="text-slate-300 mt-2 text-lg">A sua plataforma de eventos</p>
         </div>
-        <div className="space-y-8">
-          <div className="flex items-start gap-4">
-            <span className="text-4xl"></span>
-            <div>
-              <h3 className="text-white font-semibold text-xl">Publique seus eventos</h3>
-              <p className="text-slate-300 mt-1">Compartilhe festas, churrascos, aniversários e muito mais com a comunidade.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <span className="text-4xl"></span>
-            <div>
-              <h3 className="text-white font-semibold text-xl">Filtre por categoria</h3>
-              <p className="text-slate-300 mt-1">Encontre eventos esportivos, sociais, culturais e gastronômicos perto de você.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <span className="text-4xl"></span>
-            <div>
-              <h3 className="text-white font-semibold text-xl">Conecte-se com pessoas</h3>
-              <p className="text-slate-300 mt-1">Comente, demonstre interesse e participe dos eventos da sua comunidade.</p>
-            </div>
-          </div>
+
+        {/* Imágenes en 3 columnas escalonadas y más compactas */}
+        <div className="flex-1 relative mt-4">
+
+          {/* COLUMNA IZQUIERDA */}
+          <img src={img1} alt="" className="absolute w-40 h-26 object-cover rounded-xl shadow-lg"
+            style={{ top: '4%', left: '1%', transform: 'rotate(-3deg)', height: '10rem' }} />
+          <img src={img2} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
+            style={{ top: '50%', left: '1%', transform: 'rotate(-2deg)', height: '10rem' }} />
+
+          {/* COLUMNA CENTRAL */}
+          <img src={img3} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
+            style={{ top: '18%', left: '32%', transform: 'rotate(2deg)', height: '10rem' }} />
+          <img src={img4} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
+            style={{ top: '70%', left: '32%', transform: 'rotate(2.5deg)', height: '10rem' }} />
+
+          {/* COLUMNA DERECHA */}
+          <img src={img5} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
+            style={{ top: '4%', left: '76%', transform: 'rotate(-2.5deg)', height: '10rem' }} />
+          <img src={img6} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
+            style={{ top: '34%', left: '60%', transform: 'rotate(1.5deg)', height: '10rem' }} />
+          <img src={img7} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
+            style={{ top: '64%', left: '76%', transform: 'rotate(-2deg)', height: '10rem' }} />
+
         </div>
-        <p className="text-slate-400 text-sm">© 2026 Festa de Ouro · Todos os direitos reservados</p>
+
+        {/* Copyright abajo */}
+        <p className="text-slate-400 text-sm text-center">© 2026 Festa de Ouro · Todos os direitos reservados</p>
+
       </div>
 
       {/* COLUNA DIREITA */}
@@ -72,7 +90,7 @@ function Register() {
         <div className="w-full max-w-md">
 
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Crie sua conta </h2>
+            <h2 className="text-3xl font-bold text-gray-800">Crie sua conta</h2>
             <p className="text-gray-500 mt-2">Junte-se à comunidade de eventos de Ouro Preto</p>
           </div>
 
@@ -82,13 +100,13 @@ function Register() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
                 <input type="text" name="nome" value={formData.nome} onChange={handleChange}
-                  placeholder="João"
+                  placeholder="João" required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Sobrenome</label>
                 <input type="text" name="sobrenome" value={formData.sobrenome} onChange={handleChange}
-                  placeholder="Silva"
+                  placeholder="Silva" required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" />
               </div>
             </div>
@@ -96,32 +114,22 @@ function Register() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange}
-                placeholder="seu@email.com"
+                placeholder="seu@email.com" required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefone <span className="text-gray-400 font-normal">(opcional)</span>
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
                 <input type="tel" name="telefone" value={formData.telefone} onChange={handleTelefone}
-                  placeholder="(31) 9 9999-9999"
+                  placeholder="(31) 9 9999-9999" required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  República
-                </label>
-
-                <input
-                  type="text"
-                  name="republica"
-                  value={formData.republica}
-                  onChange={handleChange}
-                  placeholder="Ex: NosTravamus"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">República</label>
+                <input type="text" name="republica" value={formData.republica} onChange={handleChange}
+                  placeholder="Ex: NosTravamus" required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" />
               </div>
             </div>
 
@@ -129,11 +137,11 @@ function Register() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
               <div className="relative">
                 <input type={showSenha ? 'text' : 'password'} name="senha" value={formData.senha} onChange={handleChange}
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Mínimo 8 caracteres" required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition pr-12" />
                 <button type="button" onClick={() => setShowSenha(!showSenha)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
-                  {showSenha ? '🔓' : '🔒'}
+                  {showSenha ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
@@ -142,11 +150,11 @@ function Register() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar senha</label>
               <div className="relative">
                 <input type={showConfirmar ? 'text' : 'password'} name="confirmarSenha" value={formData.confirmarSenha} onChange={handleChange}
-                  placeholder="Repita sua senha"
+                  placeholder="Repita sua senha" required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition pr-12" />
                 <button type="button" onClick={() => setShowConfirmar(!showConfirmar)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
-                  {showConfirmar ? '🔓' : '🔒'}
+                  {showConfirmar ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
