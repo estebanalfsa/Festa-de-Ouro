@@ -55,36 +55,6 @@ Acesse:
 
 ---
 
-## Estrutura do Projeto
-
-```
-festa-de-ouro/
-│
-├── backend/              # Django REST API
-│   ├── apps/
-│   │   ├── users/        # Autenticação e perfis
-│   │   ├── posts/        # Publicações de eventos
-│   │   └── comments/     # Comentários
-│   ├── requirements.txt
-│   └── Dockerfile
-│
-├── frontend/             # React App
-│   ├── src/
-│   │   ├── pages/        # Login, Home, Perfil
-│   │   ├── components/   # Navbar, Cards, Formulários
-│   │   └── services/     # Chamadas à API
-│   ├── package.json
-│   └── Dockerfile
-│
-├── docker-compose.yml
-├── .env.example
-└── README.md
-```
-
----
-
-## Branches
-
 ```
 main        → código estável e funcional
 dev         → integração do time
@@ -95,17 +65,17 @@ feature/*   → funcionalidades em desenvolvimento
 
 ## Integrantes
 
-| Nome | Função |
-|---|---|
-| Carlos Fabricio Benites Rodriguez | Backend — Autenticação e usuários |
-| Gruner Antonio Sánchez Morales| Backend — Posts, categorias e API |
-| Jose Esteba Andres Alfaro Sánchez | Frontend — Login, registro, navegação e feed principal e cards de eventos |
+| Nome |
+|---|
+| Carlos Fabricio Benites Rodriguez |
+| Gruner Antonio Sánchez Morales|
+| Jose Esteba Andres Alfaro Sánchez |
 
 ---
 
-## Progresso
+## Quadro Kanban
 
-Acompanhe as tarefas e o progresso do time na aba [Projects](../../projects) do repositório.
+Acompanhe as tarefas e o progresso do time na aba [Projects](https://github.com/users/estebanalfsa/projects/2/views/1) do repositório.
 
 ---
 
