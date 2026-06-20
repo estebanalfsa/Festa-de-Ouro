@@ -23,7 +23,7 @@
 |---|---|
 | Frontend | React + Tailwind CSS |
 | Backend | Django + Django REST Framework |
-| Banco de dados | PostgreSQL |
+| Banco de dados | SQLite |
 | Containerização | Docker + Docker Compose |
 | Controle de versão | Git + GitHub |
 
