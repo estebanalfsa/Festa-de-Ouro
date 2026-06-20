@@ -111,7 +111,7 @@ export default function Senha() {
 
           <p className="text-center text-gray-600">
             Lembrou a senha?{' '}
-            <Link to="/" className="text-orange-500 font-semibold hover:underline">Entrar aqui</Link>
+            <Link to="/login" className="text-orange-500 font-semibold hover:underline">Entrar aqui</Link>
           </p>
 
           <p className="text-center text-gray-600 mt-3">

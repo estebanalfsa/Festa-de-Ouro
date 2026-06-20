@@ -1,63 +1,75 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { getUsers, getAllUsersInfo, getPosts, isAuthenticated, logout } from '../services/api'
 
 export default function User() {
   const [activeTab, setActiveTab] = useState('publicacoes')
+  const [userProfile, setUserProfile] = useState(null)
+  const [publications, setPublications] = useState([])
+  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
-  const userProfile = {
-    name: 'Esteban Alfaro',
-    surname: 'Silva',
-    nickname: 'Teba',
-    username: '@esteban_alfaro',
-    bio: 'Organizador de eventos comunitários, churrascos e encontros musicais. Aqui ficam os meus eventos, favoritos e o que estou a acompanhar em Festa de Ouro.',
-    avatar: 'https://avatars.githubusercontent.com/u/168954266?v=4',
-    coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
-    city: 'Ouro Preto',
-    republic: 'República Nostravamus',
-    joinedAt: 'Membro desde Janeiro 2026',
-    eventsCreatedCount: 14,
-    attendingCount: 32,
-    followersCount: 128,
-    likesReceived: 246,
-    savedEvents: 18
-  }
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/login')
+      return
+    }
 
-  const stats = [
-    { label: 'Eventos criados', value: userProfile.eventsCreatedCount },
-    { label: 'Presenças', value: userProfile.attendingCount },
-    { label: 'Seguidores', value: userProfile.followersCount },
-    { label: 'Gostos recebidos', value: userProfile.likesReceived }
-  ]
+    const userId = parseInt(localStorage.getItem('user_id'), 10)
+
+    Promise.all([getUsers(), getAllUsersInfo(), getPosts()])
+      .then(([usersRes, infoRes, postsRes]) => {
+        const user = usersRes.data.find((u) => u.id === userId) || usersRes.data[0]
+        const info = infoRes.data.find((i) => i.user === user.id)
+        const userPosts = postsRes.data.filter((p) => p.user === user.id)
+
+        setUserProfile({
+          name: info ? `${info.nombre} ${info.apellido1 || ''}`.trim() : user.email,
+          surname: info?.apellido2 || '',
+          nickname: info?.nombre || '',
+          username: `@${user.email.split('@')[0]}`,
+          bio: info?.republica
+            ? `Membro da ${info.republica}. Organizador de eventos comunitários, churrascos e encontros musicais.`
+            : 'Organizador de eventos comunitários e encontros musicais.',
+          avatar: 'https://avatars.githubusercontent.com/u/168954266?v=4',
+          coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
+          city: 'Ouro Preto',
+          republic: info?.republica || 'N/A',
+          joinedAt: 'Membro desde Janeiro 2026',
+          eventsCreatedCount: userPosts.length,
+          attendingCount: 32,
+          followersCount: 128,
+          likesReceived: 246,
+          savedEvents: 18,
+          idade: info?.idade,
+          apellido1: info?.apellido1 || '',
+        })
+
+        setPublications(
+          userPosts.map((p) => ({
+            id: p.id,
+            title: p.titulo,
+            date: p.data ? p.data.split(' ')[0] : '',
+            time: p.data ? p.data.split(' ')[1] || '' : '',
+            summary: p.com || '',
+            likes: 0,
+            comments: 0,
+            attendees: 0,
+            status: p.assunto || 'Publicado',
+          }))
+        )
+      })
+      .catch(() => {
+        setUserProfile(null)
+        setPublications([])
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
   const tabs = [
     { id: 'publicacoes', label: 'Publicações' },
     { id: 'eventos', label: 'Meus eventos' },
     { id: 'favoritos', label: 'Favoritos' }
-  ]
-
-  const publications = [
-    {
-      id: 1,
-      title: 'Churrasco de Integração no Parque',
-      date: 'Hoje',
-      time: '12:00',
-      summary: 'Preparando o próximo encontro da comunidade com comida, música e muita conversa.',
-      likes: 42,
-      comments: 9,
-      attendees: 27,
-      status: 'Publicado'
-    },
-    {
-      id: 2,
-      title: 'Noite acústica no centro histórico',
-      date: 'Ontem',
-      time: '19:30',
-      summary: 'Evento com bandas locais e lotação quase completa. Ótima resposta da comunidade.',
-      likes: 31,
-      comments: 6,
-      attendees: 18,
-      status: 'Em destaque'
-    }
   ]
 
   const favoriteEvents = [
@@ -85,6 +97,29 @@ export default function User() {
       likes: 86,
       location: 'Complexo Desportivo Municipal'
     }
+  ]
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex items-center justify-center">
+        <p className="text-slate-400">Carregando perfil...</p>
+      </div>
+    )
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex items-center justify-center">
+        <p className="text-slate-400">Erro ao carregar perfil.</p>
+      </div>
+    )
+  }
+
+  const stats = [
+    { label: 'Eventos criados', value: userProfile.eventsCreatedCount },
+    { label: 'Presenças', value: userProfile.attendingCount },
+    { label: 'Seguidores', value: userProfile.followersCount },
+    { label: 'Gostos recebidos', value: userProfile.likesReceived }
   ]
 
   return (
@@ -118,6 +153,12 @@ export default function User() {
                 <p className="text-xs text-slate-400">Perfil ativo</p>
               </div>
             </div>
+            <button
+              onClick={() => { logout(); navigate('/home') }}
+              className="text-xs text-slate-400 hover:text-slate-200 transition cursor-pointer"
+            >
+              Sair
+            </button>
           </div>
         </div>
       </header>

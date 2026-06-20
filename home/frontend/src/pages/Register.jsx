@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../services/api'
 
 import img1 from '../assets/img_reg1.jpeg'
 import img2 from '../assets/img_reg2.jpeg'
@@ -21,6 +22,9 @@ function Register() {
   })
   const [showSenha, setShowSenha] = useState(false)
   const [showConfirmar, setShowConfirmar] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -35,9 +39,30 @@ function Register() {
     setFormData(prev => ({ ...prev, telefone: v }))
   }
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault()
-    console.log('Registro:', formData)
+    setError('')
+    if (formData.senha !== formData.confirmarSenha) {
+      setError('As senhas não coincidem')
+      return
+    }
+    try {
+      const res = await api.post('/users/', {
+        email: formData.email,
+        senha: formData.senha,
+      })
+      const userId = res.data.id
+      await api.post('/users-info/', {
+        nombre: formData.nome,
+        apellido1: formData.sobrenome,
+        republica: formData.republica,
+        user: userId,
+      })
+      setSuccess(true)
+      setTimeout(() => navigate('/'), 2000)
+    } catch {
+      setError('Erro ao registrar. Tente novamente.')
+    }
   }
 
   return (
@@ -179,6 +204,17 @@ function Register() {
               </div>
             </div>
 
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-lg px-4 py-3">
+                Conta criada com sucesso! Redirecionando...
+              </div>
+            )}
+
             <button type="submit"
               className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 text-lg shadow-md">
               Criar conta
@@ -194,7 +230,7 @@ function Register() {
 
           <p className="text-center text-gray-600">
             Já tem uma conta?{' '}
-            <Link to="/" className="text-orange-500 font-semibold hover:underline">Entrar aqui</Link>
+            <Link to="/login" className="text-orange-500 font-semibold hover:underline">Entrar aqui</Link>
           </p>
 
         </div>

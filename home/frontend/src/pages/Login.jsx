@@ -1,15 +1,27 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import api from '../services/api'
 
 function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [error, setError] = useState('')
     const navigate = useNavigate()
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault()
-        console.log('Login:', email, password)
-        navigate('/home')
+        setError('')
+        try {
+            const res = await api.post('/token/', { email, password })
+            localStorage.setItem('access_token', res.data.access)
+            localStorage.setItem('refresh_token', res.data.refresh)
+            localStorage.setItem('user_id', res.data.user_id)
+            localStorage.setItem('user_email', res.data.email)
+            navigate('/home')
+        } catch (err) {
+            const msg = err.response?.data?.non_field_errors?.[0] || 'Email ou senha inválidos'
+            setError(msg)
+        }
     }
 
     return (
@@ -98,6 +110,12 @@ function Login() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
                             />
                         </div>
+
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                                {error}
+                            </div>
+                        )}
 
                         <button
                             type="submit"
