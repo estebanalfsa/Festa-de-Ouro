@@ -11,15 +11,24 @@ class UserInfoSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'senha']
+        fields = ['id', 'email', 'password']
         extra_kwargs = {
-            'senha': {'write_only': True},
+            'password': {'write_only': True},
         }
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
 
 
 class UserWithInfoSerializer(serializers.ModelSerializer):
-    info = UserInfoSerializer(source='userinfo', read_only=True)
+    info = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['id', 'email', 'info']
+
+    def get_info(self, obj):
+        try:
+            return UserInfoSerializer(obj.userinfo).data
+        except UserInfo.DoesNotExist:
+            return None

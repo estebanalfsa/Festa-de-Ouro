@@ -49,7 +49,7 @@ function Register() {
     try {
       const res = await api.post('/users/', {
         email: formData.email,
-        senha: formData.senha,
+        password: formData.senha,
       })
       const userId = res.data.id
       await api.post('/users-info/', {
@@ -58,8 +58,16 @@ function Register() {
         republica: formData.republica,
         user: userId,
       })
+      const loginRes = await api.post('/token/', {
+        email: formData.email,
+        password: formData.senha,
+      })
+      localStorage.setItem('access_token', loginRes.data.access)
+      localStorage.setItem('refresh_token', loginRes.data.refresh)
+      localStorage.setItem('user_id', loginRes.data.user_id)
+      localStorage.setItem('user_email', loginRes.data.email)
       setSuccess(true)
-      setTimeout(() => navigate('/'), 2000)
+      setTimeout(() => navigate('/user'), 2000)
     } catch {
       setError('Erro ao registrar. Tente novamente.')
     }

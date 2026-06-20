@@ -1,7 +1,7 @@
-from rest_framework import viewsets
-from rest_framework import serializers
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import authenticate
+from rest_framework import viewsets, serializers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from .models import User, UserInfo
 from .serializers import UserSerializer, UserInfoSerializer
 
@@ -13,12 +13,8 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         email = attrs.get('email')
         password = attrs.get('password')
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise serializers.ValidationError('No user found with this email')
-
-        if user.senha != password:
+        user = authenticate(email=email, password=password)
+        if user is None:
             raise serializers.ValidationError('Invalid email or password')
 
         self.user = user
@@ -34,6 +30,16 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
+
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    @property
+    def user_model(self):
+        return User
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):

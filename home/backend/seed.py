@@ -19,7 +19,10 @@ users_data = [
 
 users = []
 for data in users_data:
-    user, _ = User.objects.get_or_create(email=data['email'], defaults={'senha': data['senha']})
+    user, created = User.objects.get_or_create(email=data['email'])
+    if created:
+        user.set_password(data['senha'])
+        user.save()
     users.append(user)
 
 # --- User_Info ---

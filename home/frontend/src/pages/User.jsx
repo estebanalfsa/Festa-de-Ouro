@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getUsers, getAllUsersInfo, getPosts, isAuthenticated, logout } from '../services/api'
+import { getUsers, getAllUsersInfo, getPosts, isAuthenticated, logout, updateUserInfo } from '../services/api'
 
 export default function User() {
   const [activeTab, setActiveTab] = useState('publicacoes')
   const [userProfile, setUserProfile] = useState(null)
   const [publications, setPublications] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showProfileForm, setShowProfileForm] = useState(false)
+  const [profileForm, setProfileForm] = useState({ idade: '', apellido2: '' })
+  const [profileError, setProfileError] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -19,9 +22,19 @@ export default function User() {
 
     Promise.all([getUsers(), getAllUsersInfo(), getPosts()])
       .then(([usersRes, infoRes, postsRes]) => {
-        const user = usersRes.data.find((u) => u.id === userId) || usersRes.data[0]
+        const user = usersRes.data.find((u) => u.id === userId)
+        if (!user) {
+          throw new Error('Usuario no encontrado')
+        }
         const info = infoRes.data.find((i) => i.user === user.id)
         const userPosts = postsRes.data.filter((p) => p.user === user.id)
+
+        const needsProfile = info && (!info.idade || !info.apellido2)
+        setShowProfileForm(needsProfile)
+        setProfileForm({
+          idade: info?.idade || '',
+          apellido2: info?.apellido2 || '',
+        })
 
         setUserProfile({
           name: info ? `${info.nombre} ${info.apellido1 || ''}`.trim() : user.email,
@@ -43,6 +56,7 @@ export default function User() {
           savedEvents: 18,
           idade: info?.idade,
           apellido1: info?.apellido1 || '',
+          infoId: info?.user,
         })
 
         setPublications(
@@ -59,12 +73,32 @@ export default function User() {
           }))
         )
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Error al cargar perfil:', err)
         setUserProfile(null)
         setPublications([])
       })
       .finally(() => setLoading(false))
   }, [])
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault()
+    setProfileError('')
+    try {
+      const data = {}
+      if (profileForm.idade) data.idade = parseInt(profileForm.idade, 10)
+      if (profileForm.apellido2) data.apellido2 = profileForm.apellido2
+      await updateUserInfo(userProfile.infoId, data)
+      setShowProfileForm(false)
+      setUserProfile((prev) => ({
+        ...prev,
+        idade: data.idade || prev.idade,
+        surname: data.apellido2 || prev.surname,
+      }))
+    } catch {
+      setProfileError('Erro ao salvar. Tente novamente.')
+    }
+  }
 
   const tabs = [
     { id: 'publicacoes', label: 'Publicações' },
@@ -237,6 +271,7 @@ export default function User() {
                       type="button"
                       aria-label="Editar perfil"
                       title="Editar perfil"
+                      onClick={() => setShowProfileForm((v) => !v)}
                       className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800"
                     >
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -338,6 +373,49 @@ export default function User() {
               </aside>
 
               <section className="lg:col-span-8 space-y-6">
+                {showProfileForm && (
+                  <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <h4 className="text-lg font-bold text-amber-900">Complete seu perfil</h4>
+                      <span className="rounded-full bg-amber-200 px-3 py-1 text-xs font-semibold text-amber-800">Pendente</span>
+                    </div>
+                    <p className="mt-2 text-sm text-amber-700">
+                      Adicione mais informações para que outros membros possam conhecer você.
+                    </p>
+                    <form onSubmit={handleProfileUpdate} className="mt-4 flex flex-wrap items-end gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-amber-800 mb-1">Idade</label>
+                        <input
+                          type="number"
+                          value={profileForm.idade}
+                          onChange={(e) => setProfileForm((p) => ({ ...p, idade: e.target.value }))}
+                          placeholder="Ex: 24"
+                          className="w-24 rounded-xl border border-amber-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-amber-800 mb-1">Segundo sobrenome</label>
+                        <input
+                          type="text"
+                          value={profileForm.apellido2}
+                          onChange={(e) => setProfileForm((p) => ({ ...p, apellido2: e.target.value }))}
+                          placeholder="Ex: Silva"
+                          className="w-40 rounded-xl border border-amber-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-400 transition"
+                      >
+                        Salvar
+                      </button>
+                      {profileError && (
+                        <p className="w-full text-xs text-red-600">{profileError}</p>
+                      )}
+                    </form>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 overflow-x-auto pb-1">
                   {tabs.map((tab) => (
                     <button
