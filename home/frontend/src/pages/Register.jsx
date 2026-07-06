@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 
-import img1 from '../assets/img_reg1.jpeg'
 import img2 from '../assets/img_reg2.jpeg'
 import img3 from '../assets/img_reg3.jpg'
 import img4 from '../assets/img_reg4.jpeg'
@@ -55,29 +54,18 @@ function Register() {
           <p className="text-slate-300 mt-2 text-lg">A sua plataforma de eventos</p>
         </div>
 
-        {/* Imágenes en 3 columnas escalonadas y más compactas */}
-        <div className="flex-1 relative mt-4">
-
-          {/* COLUMNA IZQUIERDA */}
-          <img src={img1} alt="" className="absolute w-40 h-26 object-cover rounded-xl shadow-lg"
-            style={{ top: '4%', left: '1%', transform: 'rotate(-3deg)', height: '6.5rem' }} />
-          <img src={img2} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '50%', left: '1%', transform: 'rotate(-2deg)', height: '6.5rem' }} />
-
-          {/* COLUMNA CENTRAL */}
-          <img src={img3} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '18%', left: '32%', transform: 'rotate(2deg)', height: '6.5rem' }} />
-          <img src={img4} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '70%', left: '32%', transform: 'rotate(2.5deg)', height: '6.5rem' }} />
-
-          {/* COLUMNA DERECHA */}
-          <img src={img5} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '4%', left: '76%', transform: 'rotate(-2.5deg)', height: '6.5rem' }} />
-          <img src={img6} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '34%', left: '60%', transform: 'rotate(1.5deg)', height: '6.5rem' }} />
-          <img src={img7} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '64%', left: '76%', transform: 'rotate(-2deg)', height: '6.5rem' }} />
-
+        {/* Collage tipo poster: fotos con bordes blancos individuales */}
+        <div className="flex-1 mt-6 flex items-center justify-center">
+          <div className="w-full max-w-[1700px] rounded-md overflow-hidden shadow-2xl">
+            <div className="grid grid-cols-3 grid-rows-2 gap-px bg-white">
+              <img src={img2} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img3} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img4} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img5} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img6} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img7} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+            </div>
+          </div>
         </div>
 
         {/* Copyright abajo */}
