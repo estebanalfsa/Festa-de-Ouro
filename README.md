@@ -38,14 +38,14 @@
 
 ```bash
 # 1. Clonar o repositório
-git clone https://github.com/SEU_USUARIO/festa-de-ouro.git
+git clone https://github.com/estebanalfsa/Festa-de-Ouro
 cd festa-de-ouro
 
 # 2. Copiar as variáveis de ambiente
 cp .env.example .env
 
 # 3. Subir os containers
-docker-compose up --build
+sudo docker compose -f docker-compose.yml up
 ```
 
 Acesse:
@@ -65,10 +65,17 @@ feature/*   → funcionalidades em desenvolvimento
 
 ## Integrantes
 
+<<<<<<< HEAD
 | Nome |
 |---|
 | Carlos Fabricio Benites Rodriguez |
 | Gruner Antonio Sánchez Morales|
+=======
+| Nome | 
+|---|
+| Carlos Fabricio Benites Rodriguez |
+| Gruner Antonio Sánchez Morales |
+>>>>>>> feature/auth
 | Jose Esteba Andres Alfaro Sánchez |
 
 ---
