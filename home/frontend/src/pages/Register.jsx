@@ -1,17 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-<<<<<<< HEAD
-=======
 import { Eye, EyeOff } from 'lucide-react'
->>>>>>> feature/auth
 
-import img1 from '../assets/img_reg1.jpeg'
 import img2 from '../assets/img_reg2.jpeg'
 import img3 from '../assets/img_reg3.jpg'
 import img4 from '../assets/img_reg4.jpeg'
 import img5 from '../assets/img_reg5.jpg'
 import img6 from '../assets/img_reg6.jpg'
-import img7 from '../assets/img_reg7.jpg'
+import img7 from '../assets/img_reg1.jpeg'
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -58,49 +54,18 @@ function Register() {
           <p className="text-slate-300 mt-2 text-lg">A sua plataforma de eventos</p>
         </div>
 
-        {/* Imágenes en 3 columnas escalonadas y más compactas */}
-        <div className="flex-1 relative mt-4">
-
-          {/* COLUMNA IZQUIERDA */}
-          <img src={img1} alt="" className="absolute w-40 h-26 object-cover rounded-xl shadow-lg"
-<<<<<<< HEAD
-            style={{ top: '4%', left: '1%', transform: 'rotate(-3deg)', height: '10rem' }} />
-          <img src={img2} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '50%', left: '1%', transform: 'rotate(-2deg)', height: '10rem' }} />
-
-          {/* COLUMNA CENTRAL */}
-          <img src={img3} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '18%', left: '32%', transform: 'rotate(2deg)', height: '10rem' }} />
-          <img src={img4} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '70%', left: '32%', transform: 'rotate(2.5deg)', height: '10rem' }} />
-
-          {/* COLUMNA DERECHA */}
-          <img src={img5} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '4%', left: '76%', transform: 'rotate(-2.5deg)', height: '10rem' }} />
-          <img src={img6} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '34%', left: '60%', transform: 'rotate(1.5deg)', height: '10rem' }} />
-          <img src={img7} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '64%', left: '76%', transform: 'rotate(-2deg)', height: '10rem' }} />
-=======
-            style={{ top: '4%', left: '1%', transform: 'rotate(-3deg)', height: '6.5rem' }} />
-          <img src={img2} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '50%', left: '1%', transform: 'rotate(-2deg)', height: '6.5rem' }} />
-
-          {/* COLUMNA CENTRAL */}
-          <img src={img3} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '18%', left: '32%', transform: 'rotate(2deg)', height: '6.5rem' }} />
-          <img src={img4} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '70%', left: '32%', transform: 'rotate(2.5deg)', height: '6.5rem' }} />
-
-          {/* COLUMNA DERECHA */}
-          <img src={img5} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '4%', left: '76%', transform: 'rotate(-2.5deg)', height: '6.5rem' }} />
-          <img src={img6} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '34%', left: '60%', transform: 'rotate(1.5deg)', height: '6.5rem' }} />
-          <img src={img7} alt="" className="absolute w-40 object-cover rounded-xl shadow-lg"
-            style={{ top: '64%', left: '76%', transform: 'rotate(-2deg)', height: '6.5rem' }} />
->>>>>>> feature/auth
-
+        {/* Collage tipo poster: fotos con bordes blancos individuales */}
+        <div className="flex-1 mt-6 flex items-center justify-center">
+          <div className="w-full max-w-[1700px] rounded-md overflow-hidden shadow-2xl">
+            <div className="grid grid-cols-3 grid-rows-2 gap-px bg-white">
+              <img src={img2} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img3} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img4} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img5} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img7} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+              <img src={img6} alt="" className="w-full aspect-[6/4] object-cover border-2 border-white" />
+            </div>
+          </div>
         </div>
 
         {/* Copyright abajo */}
@@ -164,21 +129,7 @@ function Register() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition pr-12" />
                 <button type="button" onClick={() => setShowSenha(!showSenha)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
-<<<<<<< HEAD
-                    {showSenha ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    )}
-=======
                   {showSenha ? <EyeOff size={20} /> : <Eye size={20} />}
->>>>>>> feature/auth
                 </button>
               </div>
             </div>
@@ -191,22 +142,7 @@ function Register() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition pr-12" />
                 <button type="button" onClick={() => setShowConfirmar(!showConfirmar)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
-<<<<<<< HEAD
-                    {showSenha ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
-
-=======
                   {showConfirmar ? <EyeOff size={20} /> : <Eye size={20} />}
->>>>>>> feature/auth
                 </button>
               </div>
             </div>
@@ -226,11 +162,7 @@ function Register() {
 
           <p className="text-center text-gray-600">
             Já tem uma conta?{' '}
-<<<<<<< HEAD
-            <Link to="/" className="text-orange-500 font-semibold hover:underline">Entrar aqui</Link>
-=======
             <Link to="/login" className="text-orange-500 font-semibold hover:underline">Entrar aqui</Link>
->>>>>>> feature/auth
           </p>
 
         </div>
