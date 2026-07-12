@@ -11,11 +11,7 @@
   },
   "dependencies": {
     "axios": "^1.16.1",
-<<<<<<< HEAD
     "lucide-react": "^1.17.0",
-=======
-    "lucide-react": "^1.16.0",
->>>>>>> feature/auth
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.1"
