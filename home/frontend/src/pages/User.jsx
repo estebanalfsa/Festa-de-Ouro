@@ -5,6 +5,7 @@ import axios from 'axios'
 export default function User() {
   const [activeTab, setActiveTab] = useState('publicacoes')
   const [userProfile, setUserProfile] = useState(null)
+  const [userPosts, setUserPosts] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const navigate = useNavigate()
@@ -18,6 +19,7 @@ export default function User() {
         })
         const data = response.data
         setUserProfile({
+          userId: data.userId,
           name: data.nome,
           surname: data.sobrenome,
           nickname: data.nome,
@@ -28,12 +30,12 @@ export default function User() {
           city: '',
           republic: data.republica,
           joinedAt: new Date(data.dataJuncao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
-          eventsCreatedCount: 0,
-          attendingCount: 0,
-          followersCount: 0,
-          likesReceived: 0,
-          savedEvents: 0
         })
+
+        const postsRes = await axios.get(`http://localhost:8000/api/posts/?author=${data.userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUserPosts(postsRes.data.results || postsRes.data)
       } catch (err) {
         setErro('Não foi possível carregar o perfil')
       } finally {
@@ -60,10 +62,10 @@ export default function User() {
   }
 
   const stats = [
-    { label: 'Eventos criados', value: userProfile.eventsCreatedCount },
-    { label: 'Presenças', value: userProfile.attendingCount },
-    { label: 'Seguidores', value: userProfile.followersCount },
-    { label: 'Gostos recebidos', value: userProfile.likesReceived }
+    { label: 'Eventos criados', value: userPosts.length },
+    { label: 'Presenças', value: 0 },
+    { label: 'Seguidores', value: 0 },
+    { label: 'Gostos recebidos', value: 0 }
   ]
 
   const tabs = [
@@ -72,7 +74,6 @@ export default function User() {
     { id: 'favoritos', label: 'Favoritos' }
   ]
 
-  const publications = []
   const favoriteEvents = []
 
   return (
@@ -299,31 +300,30 @@ export default function User() {
 
                 {activeTab === 'publicacoes' && (
                   <div className="space-y-4">
-                    {publications.map((publication) => (
-                      <article key={publication.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition">
+                    {userPosts.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-slate-500">Nenhuma publicação ainda.</p>
+                      </div>
+                    ) : userPosts.map((post) => (
+                      <article key={post.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">{publication.status}</span>
-                              <span className="text-xs font-medium uppercase tracking-wide text-slate-400">{publication.date} · {publication.time}</span>
+                              <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                {new Date(post.created_at).toLocaleDateString('pt-BR')}
+                              </span>
                             </div>
-                            <h5 className="text-xl font-extrabold text-slate-900">{publication.title}</h5>
-                            <p className="max-w-2xl text-sm leading-relaxed text-slate-600">{publication.summary}</p>
-                          </div>
-
-                          <div className="flex gap-3 rounded-2xl bg-slate-50 p-4 text-center sm:min-w-[180px] sm:flex-col">
-                            <div>
-                              <div className="text-lg font-black text-slate-900">{publication.likes}</div>
-                              <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Gostos</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-black text-slate-900">{publication.comments}</div>
-                              <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Comentários</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-black text-slate-900">{publication.attendees}</div>
-                              <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Confirmados</div>
-                            </div>
+                            <h5 className="text-xl font-extrabold text-slate-900">{post.title}</h5>
+                            <p className="max-w-2xl text-sm leading-relaxed text-slate-600">{post.description}</p>
+                            {post.location && (
+                              <p className="text-xs text-slate-500 flex items-center gap-1">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                {post.location}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </article>
@@ -344,14 +344,21 @@ export default function User() {
                     </div>
 
                     <div className="mt-5 grid gap-4">
-                      {publications.map((publication) => (
-                        <div key={publication.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                      {userPosts.length === 0 ? (
+                        <p className="text-slate-500 text-sm text-center py-4">Nenhum evento criado ainda.</p>
+                      ) : userPosts.map((post) => (
+                        <div key={post.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
                           <div className="flex items-start justify-between gap-4">
                             <div>
-                              <h5 className="font-bold text-slate-900">{publication.title}</h5>
-                              <p className="mt-1 text-sm text-slate-500">{publication.summary}</p>
+                              <h5 className="font-bold text-slate-900">{post.title}</h5>
+                              <p className="mt-1 text-sm text-slate-500">{post.description}</p>
+                              {post.location && (
+                                <p className="mt-1 text-xs text-slate-400">{post.location}</p>
+                              )}
                             </div>
-                            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">{publication.attendees} confirmados</span>
+                            <span className="text-xs text-slate-400 shrink-0">
+                              {new Date(post.date).toLocaleDateString('pt-BR')}
+                            </span>
                           </div>
                         </div>
                       ))}

@@ -29,13 +29,23 @@ export default function Home() {
   const [loadingPosts, setLoadingPosts] = useState(true)
   const [erroPosts, setErroPosts] = useState('')
 
-  useEffect(() => {
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createTitle, setCreateTitle] = useState('')
+  const [createDesc, setCreateDesc] = useState('')
+  const [createDate, setCreateDate] = useState('')
+  const [createLocation, setCreateLocation] = useState('')
+  const [erroCreate, setErroCreate] = useState('')
+  const [loadingCreate, setLoadingCreate] = useState(false)
+
+  const fetchPosts = () => {
     setLoadingPosts(true)
     axios.get('http://localhost:8000/api/posts/')
       .then(res => setPosts(res.data.results || res.data))
       .catch(() => setErroPosts('Não foi possível carregar os eventos.'))
       .finally(() => setLoadingPosts(false))
-  }, [])
+  }
+
+  useEffect(() => { fetchPosts() }, [])
 
   useEffect(() => {
     if (!isGuest) {
@@ -52,17 +62,7 @@ export default function Home() {
     : ''
 
   const handleCriarEvento = () => {
-    console.log('Criar Evento clicado')
-  }
-
-  const handleCriarEventoConvidado = () => {
-    setAuthTab('login')
-    setShowAuthModal(true)
-  }
-
-  const handleAbrirLogin = () => {
-    setAuthTab('login')
-    setShowAuthModal(true)
+    setShowCreateModal(true)
   }
 
   const handleModalLogin = async (e) => {
@@ -115,6 +115,32 @@ export default function Home() {
     }
   }
 
+  const handleCreateEvent = async (e) => {
+    e.preventDefault()
+    setErroCreate('')
+    setLoadingCreate(true)
+    try {
+      await axios.post('http://localhost:8000/api/posts/', {
+        title: createTitle,
+        description: createDesc,
+        date: createDate,
+        location: createLocation,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setShowCreateModal(false)
+      setCreateTitle('')
+      setCreateDesc('')
+      setCreateDate('')
+      setCreateLocation('')
+      fetchPosts()
+    } catch {
+      setErroCreate('Erro ao criar evento. Verifique os dados.')
+    } finally {
+      setLoadingCreate(false)
+    }
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/login')
@@ -144,23 +170,24 @@ export default function Home() {
 
             {isGuest ? (
               <>
-                <button
-                  onClick={handleCriarEventoConvidado}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg transition duration-150 flex items-center gap-2 text-sm shadow-md cursor-pointer"
+                <Link
+                  to="/login"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg transition duration-150 flex items-center gap-2 text-sm shadow-md"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
-                  <span>Criar Evento</span>
-                </button>
-
-                <div className="h-8 w-px bg-slate-800"></div>
+                  <span>Entrar</span>
+                </Link>
 
                 <Link
-                  onClick={handleAbrirLogin}
-                  className="text-sm font-medium text-slate-300 hover:text-white transition cursor-pointer"
+                  to="/register"
+                  className="border border-slate-600 text-slate-300 hover:text-white hover:border-slate-500 font-semibold px-4 py-2 rounded-lg transition duration-150 flex items-center gap-2 text-sm"
                 >
-                  Entrar
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  <span>Cadastrar</span>
                 </Link>
               </>
             ) : (
@@ -375,6 +402,97 @@ export default function Home() {
                 </form>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowCreateModal(false)}
+          />
+
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-slate-800">Criar Evento</h2>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEvent} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                <input
+                  type="text"
+                  value={createTitle}
+                  onChange={(e) => setCreateTitle(e.target.value)}
+                  placeholder="Nome do evento"
+                  required
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                <textarea
+                  value={createDesc}
+                  onChange={(e) => setCreateDesc(e.target.value)}
+                  placeholder="Descreva o evento..."
+                  required
+                  rows={3}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Data e hora</label>
+                  <input
+                    type="datetime-local"
+                    value={createDate}
+                    onChange={(e) => setCreateDate(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Local</label>
+                  <input
+                    type="text"
+                    value={createLocation}
+                    onChange={(e) => setCreateLocation(e.target.value)}
+                    placeholder="Endereço ou local"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm"
+                  />
+                </div>
+              </div>
+
+              {erroCreate && <p className="text-red-500 text-sm text-center">{erroCreate}</p>}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1 border border-gray-300 text-gray-700 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition text-sm"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={loadingCreate}
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm"
+                >
+                  {loadingCreate ? 'Criando...' : 'Criar Evento'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

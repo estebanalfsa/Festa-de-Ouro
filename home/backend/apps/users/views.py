@@ -53,11 +53,12 @@ class PerfilSerializer(serializers.ModelSerializer):
     nome = serializers.CharField(source='user.first_name')
     email = serializers.EmailField(source='user.email')
     username = serializers.CharField(source='user.username', read_only=True)
+    userId = serializers.IntegerField(source='user.id', read_only=True)
     dataJuncao = serializers.DateTimeField(source='user.date_joined', read_only=True)
 
     class Meta:
         model = Perfil
-        fields = ['nome', 'sobrenome', 'email', 'telefone', 'republica', 'username', 'dataJuncao']
+        fields = ['userId', 'nome', 'sobrenome', 'email', 'telefone', 'republica', 'username', 'dataJuncao']
 
 
 class MeuPerfilView(generics.RetrieveAPIView):
