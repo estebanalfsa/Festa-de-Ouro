@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
+
+const API = 'http://localhost:8000/api'
+
+function authHeader() {
+  return { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+}
+
+const emptyForm = { title: '', description: '', date: '', location: '' }
 
 export default function User() {
   const [activeTab, setActiveTab] = useState('publicacoes')
@@ -8,55 +16,129 @@ export default function User() {
   const [userPosts, setUserPosts] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
-  const navigate = useNavigate()
+
+  const [showModal, setShowModal] = useState(false)
+  const [editingPost, setEditingPost] = useState(null)
+  const [form, setForm] = useState({ ...emptyForm })
+  const [formErro, setFormErro] = useState('')
+  const [formLoading, setFormLoading] = useState(false)
+
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
+  const loadProfile = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/perfil/`, { headers: authHeader() })
+      const d = res.data
+      setUserProfile({
+        userId: d.userId,
+        name: d.nome,
+        surname: d.sobrenome,
+        username: `@${d.username}`,
+        avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(d.nome + ' ' + d.sobrenome),
+        coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
+        republic: d.republica,
+        joinedAt: new Date(d.dataJuncao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+      })
+      return d.userId
+    } catch {
+      setErro('Não foi possível carregar o perfil')
+      return null
+    }
+  }, [])
+
+  const loadPosts = useCallback(async (userId) => {
+    try {
+      const res = await axios.get(`${API}/posts/?author=${userId}`, { headers: authHeader() })
+      setUserPosts(res.data.results || res.data)
+    } catch {
+      setErro('Não foi possível carregar os eventos.')
+    }
+  }, [])
 
   useEffect(() => {
-    const buscarPerfil = async () => {
-      try {
-        const token = localStorage.getItem('access_token')
-        const response = await axios.get('http://localhost:8000/api/perfil/', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        const data = response.data
-        setUserProfile({
-          userId: data.userId,
-          name: data.nome,
-          surname: data.sobrenome,
-          nickname: data.nome,
-          username: `@${data.username}`,
-          bio: '',
-          avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.nome + ' ' + data.sobrenome),
-          coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
-          city: '',
-          republic: data.republica,
-          joinedAt: new Date(data.dataJuncao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
-        })
-
-        const postsRes = await axios.get(`http://localhost:8000/api/posts/?author=${data.userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        setUserPosts(postsRes.data.results || postsRes.data)
-      } catch (err) {
-        setErro('Não foi possível carregar o perfil')
-      } finally {
-        setCarregando(false)
-      }
+    const init = async () => {
+      setCarregando(true)
+      const userId = await loadProfile()
+      if (userId) await loadPosts(userId)
+      setCarregando(false)
     }
-    buscarPerfil()
-  }, [])
+    init()
+  }, [loadProfile, loadPosts])
+
+  const openCreate = () => {
+    setEditingPost(null)
+    setForm({ ...emptyForm })
+    setFormErro('')
+    setShowModal(true)
+  }
+
+  const openEdit = (post) => {
+    setEditingPost(post)
+    setForm({
+      title: post.title,
+      description: post.description,
+      date: post.date ? post.date.slice(0, 16) : '',
+      location: post.location || '',
+    })
+    setFormErro('')
+    setShowModal(true)
+  }
+
+  const closeModal = () => {
+    setShowModal(false)
+    setEditingPost(null)
+    setForm({ ...emptyForm })
+    setFormErro('')
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setFormErro('')
+    setFormLoading(true)
+    try {
+      if (editingPost) {
+        await axios.put(`${API}/posts/${editingPost.id}/`, form, { headers: authHeader() })
+      } else {
+        await axios.post(`${API}/posts/`, form, { headers: authHeader() })
+      }
+      closeModal()
+      if (userProfile) await loadPosts(userProfile.userId)
+    } catch {
+      setFormErro('Erro ao salvar evento. Verifique os dados.')
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleteLoading(true)
+    try {
+      await axios.delete(`${API}/posts/${deleteTarget.id}/`, { headers: authHeader() })
+      setDeleteTarget(null)
+      if (userProfile) await loadPosts(userProfile.userId)
+    } catch {
+      setErro('Erro ao excluir evento.')
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  const handleField = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }))
 
   if (carregando) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-slate-500">Carregando perfil...</p>
+        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
-  if (erro || !userProfile) {
+  if (erro && !userProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-red-500">{erro || 'Perfil não encontrado'}</p>
+        <p className="text-red-500">{erro}</p>
       </div>
     )
   }
@@ -68,36 +150,20 @@ export default function User() {
     { label: 'Gostos recebidos', value: 0 }
   ]
 
-  const tabs = [
-    { id: 'publicacoes', label: 'Publicações' },
-    { id: 'eventos', label: 'Meus eventos' },
-    { id: 'favoritos', label: 'Favoritos' }
-  ]
-
-  const favoriteEvents = []
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased">
       <header className="sticky top-0 z-40 bg-slate-900 border-b border-slate-800 px-4 py-3 sm:px-6 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 font-black text-xl">
-              F
-            </div>
+            <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 font-black text-xl">F</div>
             <div>
               <h1 className="text-white text-xl font-bold tracking-tight">Festa de <span className="text-amber-400">Ouro</span></h1>
               <p className="text-slate-400 text-xs hidden sm:block">Perfil pessoal e atividade da comunidade</p>
             </div>
           </div>
-
           <div className="flex items-center gap-3">
-            <Link
-              to="/home"
-              className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-              </svg>
+            <Link to="/home" className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
               Voltar ao feed
             </Link>
             <div className="flex items-center gap-2 rounded-xl bg-slate-800/70 px-3 py-2">
@@ -114,21 +180,14 @@ export default function User() {
       <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6">
         <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div className="h-56 sm:h-72 bg-slate-900 relative">
-            <img
-              src={userProfile.coverImage}
-              alt="Cover do perfil"
-              className="absolute inset-0 h-full w-full object-cover opacity-65"
-            />
+            <img src={userProfile.coverImage} alt="Cover" className="absolute inset-0 h-full w-full object-cover opacity-65" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
-                <span className="inline-flex items-center rounded-full bg-amber-500/90 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-950">
-                  Conta pessoal
-                </span>
+                <span className="inline-flex items-center rounded-full bg-amber-500/90 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-950">Conta pessoal</span>
                 <h2 className="mt-3 text-3xl sm:text-4xl font-black text-white tracking-tight">{userProfile.name}</h2>
-                <p className="mt-1 text-sm sm:text-base text-slate-200">{userProfile.username} · {userProfile.city}</p>
+                <p className="mt-1 text-sm sm:text-base text-slate-200">{userProfile.username}</p>
               </div>
-
             </div>
           </div>
 
@@ -136,34 +195,16 @@ export default function User() {
             <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-                  <img
-                    src={userProfile.avatar}
-                    alt={userProfile.name}
-                    className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover ring-4 ring-white shadow-lg"
-                  />
-
+                  <img src={userProfile.avatar} alt={userProfile.name} className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover ring-4 ring-white shadow-lg" />
                   <div className="pb-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-2xl font-black text-slate-900">{userProfile.name} {userProfile.surname}</h3>
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                        Disponível para eventos
-                      </span>
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Disponível para eventos</span>
                     </div>
-                    <p className="mt-1 max-w-2xl text-sm sm:text-base leading-relaxed text-slate-600">{userProfile.bio}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                      <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">Apodo: {userProfile.nickname}</span>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">Apellidos: {userProfile.surname}</span>
                       <span className="rounded-full bg-amber-50 px-3 py-1 font-medium text-amber-700">{userProfile.republic}</span>
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                      <span className="inline-flex items-center gap-2">
-                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {userProfile.city}
-                      </span>
-                      <span className="hidden sm:inline text-slate-300">•</span>
                       <span>{userProfile.joinedAt}</span>
                     </div>
                   </div>
@@ -177,48 +218,6 @@ export default function User() {
                     </div>
                   ))}
                 </div>
-
-                <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Ações do perfil</p>
-                  <div className="mt-4 grid grid-cols-3 gap-3">
-                    <button
-                      type="button"
-                      aria-label="Editar perfil"
-                      title="Editar perfil"
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800"
-                    >
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L7.31 19.342a4.5 4.5 0 01-1.897 1.13l-3.12.781.782-3.121a4.5 4.5 0 011.13-1.897l12.656-12.748z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.5 7.5l-3-3" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Partilhar perfil"
-                      title="Partilhar perfil"
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-100"
-                    >
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7.5 12.75l9-5.25M7.5 11.25l9 5.25" />
-                        <circle cx="6" cy="12" r="2" strokeWidth="2" />
-                        <circle cx="18" cy="6" r="2" strokeWidth="2" />
-                        <circle cx="18" cy="18" r="2" strokeWidth="2" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Mais opções"
-                      title="Mais opções"
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-transparent text-slate-600 shadow-sm transition hover:border-slate-400 hover:text-slate-800"
-                    >
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="5" r="1.8" />
-                        <circle cx="12" cy="12" r="1.8" />
-                        <circle cx="12" cy="19" r="1.8" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
               </div>
 
               <div className="space-y-6">
@@ -227,19 +226,10 @@ export default function User() {
                     <h4 className="text-lg font-bold">Resumo rápido</h4>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">Perfil</span>
                   </div>
-
                   <div className="mt-4 grid gap-3">
                     <div className="rounded-2xl bg-white/10 px-4 py-3">
-                      <p className="text-xs uppercase tracking-wide text-slate-300">Estado</p>
-                      <p className="mt-1 text-sm font-semibold text-white">Disponível para eventos</p>
-                    </div>
-                    <div className="rounded-2xl bg-white/10 px-4 py-3">
-                      <p className="text-xs uppercase tracking-wide text-slate-300">Cidade</p>
-                      <p className="mt-1 text-sm font-semibold text-white">{userProfile.city}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white/10 px-4 py-3">
                       <p className="text-xs uppercase tracking-wide text-slate-300">República</p>
-                      <p className="mt-1 text-sm font-semibold text-white">{userProfile.republic}</p>
+                      <p className="mt-1 text-sm font-semibold text-white">{userProfile.republic || '—'}</p>
                     </div>
                     <div className="rounded-2xl bg-white/10 px-4 py-3">
                       <p className="text-xs uppercase tracking-wide text-slate-300">Membro desde</p>
@@ -247,83 +237,64 @@ export default function User() {
                     </div>
                   </div>
                 </div>
-
-                <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-slate-900">Resumo do perfil</h4>
-                    <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Ativo</span>
-                  </div>
-
-                  <div className="mt-4 space-y-3 text-sm text-slate-600">
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                      <span>Eventos salvos</span>
-                      <strong className="text-slate-900">{userProfile.savedEvents}</strong>
-                    </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                      <span>Gostos recebidos</span>
-                      <strong className="text-slate-900">{userProfile.likesReceived}</strong>
-                    </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                      <span>Taxa de engajamento</span>
-                      <strong className="text-emerald-600">84%</strong>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
-              <aside className="lg:col-span-4 space-y-6">
-                <div className="rounded-3xl border border-slate-200 bg-slate-900 p-5 shadow-sm text-white">
-                  <h4 className="text-lg font-bold">Próximo passo sugerido</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-300">
-                    Complete o seu perfil com interesses e confirme os eventos que quer acompanhar para melhorar recomendações futuras.
-                  </p>
-                  <button className="mt-4 rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-400 transition">
-                    Completar agora
+            <div className="mt-8">
+              <section className="space-y-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                    {['publicacoes', 'eventos'].map((tabId) => (
+                      <button
+                        key={tabId}
+                        onClick={() => setActiveTab(tabId)}
+                        className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${activeTab === tabId ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'}`}
+                      >
+                        {tabId === 'publicacoes' ? 'Publicações' : 'Meus eventos'}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={openCreate}
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg transition text-sm shadow-md flex items-center gap-2 shrink-0"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+                    Criar Evento
                   </button>
-                </div>
-              </aside>
-
-              <section className="lg:col-span-8 space-y-6">
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${activeTab === tab.id ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'}`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
                 </div>
 
                 {activeTab === 'publicacoes' && (
                   <div className="space-y-4">
                     {userPosts.length === 0 ? (
-                      <div className="text-center py-12">
+                      <div className="text-center py-12 rounded-2xl border border-dashed border-slate-300">
                         <p className="text-slate-500">Nenhuma publicação ainda.</p>
+                        <button onClick={openCreate} className="mt-3 text-sm font-semibold text-orange-500 hover:text-orange-600">Criar primeiro evento</button>
                       </div>
                     ) : userPosts.map((post) => (
-                      <article key={post.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition">
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
+                      <article key={post.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-1 min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
                               <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
                                 {new Date(post.created_at).toLocaleDateString('pt-BR')}
                               </span>
+                              {post.location && (
+                                <span className="text-xs text-slate-400 flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                  {post.location}
+                                </span>
+                              )}
                             </div>
-                            <h5 className="text-xl font-extrabold text-slate-900">{post.title}</h5>
-                            <p className="max-w-2xl text-sm leading-relaxed text-slate-600">{post.description}</p>
-                            {post.location && (
-                              <p className="text-xs text-slate-500 flex items-center gap-1">
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                {post.location}
-                              </p>
-                            )}
+                            <h5 className="text-lg font-extrabold text-slate-900">{post.title}</h5>
+                            <p className="text-sm leading-relaxed text-slate-600">{post.description}</p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button onClick={() => openEdit(post)} title="Editar" className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
+                            <button onClick={() => setDeleteTarget(post)} title="Excluir" className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
                           </div>
                         </div>
                       </article>
@@ -332,61 +303,33 @@ export default function User() {
                 )}
 
                 {activeTab === 'eventos' && (
-                  <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <h4 className="text-lg font-bold text-slate-900">Meus eventos recentes</h4>
-                        <p className="mt-1 text-sm text-slate-500">Eventos criados e atualizados por você.</p>
-                      </div>
-                      <Link to="/home" className="text-sm font-semibold text-orange-600 hover:text-orange-700">
-                        Ver feed completo
-                      </Link>
-                    </div>
-
-                    <div className="mt-5 grid gap-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <h4 className="text-lg font-bold text-slate-900">Meus eventos</h4>
+                    <p className="mt-1 text-sm text-slate-500">Eventos que você criou.</p>
+                    <div className="mt-5 grid gap-3">
                       {userPosts.length === 0 ? (
                         <p className="text-slate-500 text-sm text-center py-4">Nenhum evento criado ainda.</p>
                       ) : userPosts.map((post) => (
-                        <div key={post.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <h5 className="font-bold text-slate-900">{post.title}</h5>
-                              <p className="mt-1 text-sm text-slate-500">{post.description}</p>
-                              {post.location && (
-                                <p className="mt-1 text-xs text-slate-400">{post.location}</p>
-                              )}
+                        <div key={post.id} className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                          <div className="min-w-0 flex-1">
+                            <h5 className="font-bold text-slate-900">{post.title}</h5>
+                            <p className="mt-1 text-sm text-slate-500 line-clamp-2">{post.description}</p>
+                            <div className="mt-2 flex items-center gap-3 text-xs text-slate-400">
+                              {post.location && <span>{post.location}</span>}
+                              <span>{new Date(post.date).toLocaleDateString('pt-BR')}</span>
                             </div>
-                            <span className="text-xs text-slate-400 shrink-0">
-                              {new Date(post.date).toLocaleDateString('pt-BR')}
-                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button onClick={() => openEdit(post)} title="Editar" className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
+                            <button onClick={() => setDeleteTarget(post)} title="Excluir" className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
-
-                {activeTab === 'favoritos' && (
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    {favoriteEvents.map((event) => (
-                      <article key={event.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">{event.category}</span>
-                          <span className="text-xs font-semibold text-slate-400">{event.date}</span>
-                        </div>
-                        <h5 className="mt-4 text-lg font-extrabold text-slate-900">{event.title}</h5>
-                        <p className="mt-2 text-sm text-slate-600">{event.location}</p>
-
-                        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                          <div className="text-sm text-slate-500">
-                            <span className="font-bold text-slate-900">{event.likes}</span> me interessa
-                          </div>
-                          <button className="text-sm font-semibold text-orange-600 hover:text-orange-700">
-                            Abrir
-                          </button>
-                        </div>
-                      </article>
-                    ))}
                   </div>
                 )}
               </section>
@@ -394,6 +337,63 @@ export default function User() {
           </div>
         </section>
       </main>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModal} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-slate-800">{editingPost ? 'Editar Evento' : 'Criar Evento'}</h2>
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                <input type="text" value={form.title} onChange={handleField('title')} required className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                <textarea value={form.description} onChange={handleField('description')} required rows={3} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm resize-none" />
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Data e hora</label>
+                  <input type="datetime-local" value={form.date} onChange={handleField('date')} required className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Local</label>
+                  <input type="text" value={form.location} onChange={handleField('location')} placeholder="Opcional" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm" />
+                </div>
+              </div>
+              {formErro && <p className="text-red-500 text-sm text-center">{formErro}</p>}
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={closeModal} className="flex-1 border border-gray-300 text-gray-700 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition text-sm">Cancelar</button>
+                <button type="submit" disabled={formLoading} className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm">
+                  {formLoading ? 'Salvando...' : editingPost ? 'Salvar Alterações' : 'Criar Evento'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !deleteLoading && setDeleteTarget(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-bold text-slate-800">Excluir evento</h3>
+            <p className="mt-2 text-sm text-slate-600">Tem certeza que deseja excluir <strong>{deleteTarget.title}</strong>? Esta ação não pode ser desfeita.</p>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setDeleteTarget(null)} disabled={deleteLoading} className="flex-1 border border-gray-300 text-gray-700 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition text-sm">Cancelar</button>
+              <button onClick={handleDelete} disabled={deleteLoading} className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm">
+                {deleteLoading ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

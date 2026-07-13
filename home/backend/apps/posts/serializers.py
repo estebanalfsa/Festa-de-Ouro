@@ -27,10 +27,6 @@ class PostSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['author', 'created_at', 'updated_at']
 
-    def create(self, validated_data):
-        validated_data['author'] = self.context['request'].user
-        return super().create(validated_data)
-
     def get_author_nome(self, obj):
         return obj.author.first_name or ''
 

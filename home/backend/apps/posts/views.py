@@ -11,9 +11,16 @@ class IsAuthenticatedOrReadOnly(permissions.BasePermission):
         return request.user and request.user.is_authenticated
 
 
+class IsAuthorOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.author == request.user
+
+
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = [OrderingFilter]
     ordering_fields = ['created_at', 'date']
     ordering = ['-created_at']
@@ -24,3 +31,6 @@ class PostViewSet(viewsets.ModelViewSet):
         if author:
             qs = qs.filter(author_id=author)
         return qs
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
