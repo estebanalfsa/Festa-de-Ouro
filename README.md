@@ -23,7 +23,7 @@
 |---|---|
 | Frontend | React + Tailwind CSS |
 | Backend | Django + Django REST Framework |
-| Banco de dados | PostgreSQL |
+| Banco de dados | SQLite |
 | Containerização | Docker + Docker Compose |
 | Controle de versão | Git + GitHub |
 
@@ -65,10 +65,17 @@ feature/*   → funcionalidades em desenvolvimento
 
 ## Integrantes
 
+<<<<<<< HEAD
+| Nome |
+|---|
+| Carlos Fabricio Benites Rodriguez |
+| Gruner Antonio Sánchez Morales|
+=======
 | Nome | 
 |---|
 | Carlos Fabricio Benites Rodriguez |
 | Gruner Antonio Sánchez Morales |
+>>>>>>> feature/auth
 | Jose Esteba Andres Alfaro Sánchez |
 
 ---
