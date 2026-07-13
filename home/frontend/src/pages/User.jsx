@@ -1,25 +1,62 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 export default function User() {
   const [activeTab, setActiveTab] = useState('publicacoes')
+  const [userProfile, setUserProfile] = useState(null)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+  const navigate = useNavigate()
 
-  const userProfile = {
-    name: 'Esteban Alfaro',
-    surname: 'Silva',
-    nickname: 'Teba',
-    username: '@esteban_alfaro',
-    bio: 'Organizador de eventos comunitários, churrascos e encontros musicais. Aqui ficam os meus eventos, favoritos e o que estou a acompanhar em Festa de Ouro.',
-    avatar: 'https://avatars.githubusercontent.com/u/168954266?v=4',
-    coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
-    city: 'Ouro Preto',
-    republic: 'República Nostravamus',
-    joinedAt: 'Membro desde Janeiro 2026',
-    eventsCreatedCount: 14,
-    attendingCount: 32,
-    followersCount: 128,
-    likesReceived: 246,
-    savedEvents: 18
+  useEffect(() => {
+    const buscarPerfil = async () => {
+      try {
+        const token = localStorage.getItem('access_token')
+        const response = await axios.get('http://localhost:8000/api/perfil/', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const data = response.data
+        setUserProfile({
+          name: data.nome,
+          surname: data.sobrenome,
+          nickname: data.nome,
+          username: `@${data.username}`,
+          bio: '',
+          avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.nome + ' ' + data.sobrenome),
+          coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
+          city: '',
+          republic: data.republica,
+          joinedAt: new Date(data.dataJuncao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+          eventsCreatedCount: 0,
+          attendingCount: 0,
+          followersCount: 0,
+          likesReceived: 0,
+          savedEvents: 0
+        })
+      } catch (err) {
+        setErro('Não foi possível carregar o perfil')
+      } finally {
+        setCarregando(false)
+      }
+    }
+    buscarPerfil()
+  }, [])
+
+  if (carregando) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-500">Carregando perfil...</p>
+      </div>
+    )
+  }
+
+  if (erro || !userProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-red-500">{erro || 'Perfil não encontrado'}</p>
+      </div>
+    )
   }
 
   const stats = [
@@ -35,57 +72,8 @@ export default function User() {
     { id: 'favoritos', label: 'Favoritos' }
   ]
 
-  const publications = [
-    {
-      id: 1,
-      title: 'Churrasco de Integração no Parque',
-      date: 'Hoje',
-      time: '12:00',
-      summary: 'Preparando o próximo encontro da comunidade com comida, música e muita conversa.',
-      likes: 42,
-      comments: 9,
-      attendees: 27,
-      status: 'Publicado'
-    },
-    {
-      id: 2,
-      title: 'Noite acústica no centro histórico',
-      date: 'Ontem',
-      time: '19:30',
-      summary: 'Evento com bandas locais e lotação quase completa. Ótima resposta da comunidade.',
-      likes: 31,
-      comments: 6,
-      attendees: 18,
-      status: 'Em destaque'
-    }
-  ]
-
-  const favoriteEvents = [
-    {
-      id: 1,
-      title: 'Festival de Rock Acústico',
-      category: 'Shows & Festas',
-      date: '29 de Maio',
-      likes: 188,
-      location: 'Vintage Café & Bistrô'
-    },
-    {
-      id: 2,
-      title: 'Churrasco de Integração',
-      category: 'Churrascos',
-      date: '30 de Maio',
-      likes: 124,
-      location: 'Parque da Cidade'
-    },
-    {
-      id: 3,
-      title: 'Torneio de Futebol Amador',
-      category: 'Esportes',
-      date: '1 de Junho',
-      likes: 86,
-      location: 'Complexo Desportivo Municipal'
-    }
-  ]
+  const publications = []
+  const favoriteEvents = []
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased">

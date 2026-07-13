@@ -1,14 +1,32 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import axios from 'axios'
 
 function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [erro, setErro] = useState('')
     const navigate = useNavigate()
+    const { login, logout } = useAuth()
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault()
-        console.log('Login:', email, password)
+        setErro('')
+        try {
+            const response = await axios.post('http://localhost:8000/api/login/', {
+                username: email,
+                password: password,
+            })
+            login(response.data.access, response.data.refresh)
+            navigate('/home')
+        } catch (err) {
+            setErro('Email ou senha inválidos')
+        }
+    }
+
+    const handleGuest = () => {
+        logout()
         navigate('/home')
     }
 
@@ -99,11 +117,23 @@ function Login() {
                             />
                         </div>
 
+                        {erro && (
+                            <p className="text-red-500 text-sm text-center">{erro}</p>
+                        )}
+
                         <button
                             type="submit"
                             className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 text-lg shadow-md"
                         >
                             Entrar
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleGuest}
+                            className="w-full border border-gray-300 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-100 transition duration-200 text-lg"
+                        >
+                            Ingressar como convidado
                         </button>
 
                     </form>

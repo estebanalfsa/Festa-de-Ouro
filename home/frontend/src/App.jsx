@@ -4,6 +4,7 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import User from './pages/User'
 import Senha from './pages/Senha'
+import RutaProtegida from './components/RutaProtegida'
 
 function App() {
   return (
@@ -13,7 +14,14 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<Home />} />
-        <Route path='/user' element={<User />} />
+        <Route
+          path='/user'
+          element={
+            <RutaProtegida>
+              <User />
+            </RutaProtegida>
+          }
+        />
         <Route path='/senha' element={<Senha />} />
       </Routes>
     </BrowserRouter>

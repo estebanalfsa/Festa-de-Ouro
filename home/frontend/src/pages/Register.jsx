@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
+import axios from 'axios'
 
 import img2 from '../assets/img_reg2.jpeg'
 import img3 from '../assets/img_reg3.jpg'
@@ -21,6 +22,9 @@ function Register() {
   })
   const [showSenha, setShowSenha] = useState(false)
   const [showConfirmar, setShowConfirmar] = useState(false)
+  const [erro, setErro] = useState('')
+  const [carregando, setCarregando] = useState(false)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -35,9 +39,42 @@ function Register() {
     setFormData(prev => ({ ...prev, telefone: v }))
   }
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault()
-    console.log('Registro:', formData)
+    setErro('')
+
+    if (formData.senha !== formData.confirmarSenha) {
+      setErro('As senhas não coincidem')
+      return
+    }
+    if (formData.senha.length < 8) {
+      setErro('A senha deve ter no mínimo 8 caracteres')
+      return
+    }
+
+    setCarregando(true)
+    try {
+      await axios.post('http://localhost:8000/api/register/', {
+        first_name: formData.nome,
+        sobrenome: formData.sobrenome,
+        email: formData.email,
+        telefone: formData.telefone,
+        republica: formData.republica,
+        password: formData.senha,
+        confirmarSenha: formData.confirmarSenha,
+      })
+      navigate('/login')
+    } catch (err) {
+      const data = err.response?.data
+      if (data) {
+        const primeiraChave = Object.keys(data)[0]
+        setErro(Array.isArray(data[primeiraChave]) ? data[primeiraChave][0] : String(data[primeiraChave]))
+      } else {
+        setErro('Erro ao criar conta. Tente novamente.')
+      }
+    } finally {
+      setCarregando(false)
+    }
   }
 
   return (
@@ -46,7 +83,6 @@ function Register() {
       {/* COLUNA ESQUERDA */}
       <div className="hidden md:flex w-1/2 bg-slate-900 flex-col justify-between py-10 px-8">
 
-        {/* Título centrado arriba */}
         <div className="text-center">
           <h1 className="text-white font-bold tracking-tight w-full" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)' }}>
             Festa de <span className="text-amber-400">Ouro</span>
@@ -54,7 +90,6 @@ function Register() {
           <p className="text-slate-300 mt-2 text-lg">A sua plataforma de eventos</p>
         </div>
 
-        {/* Collage tipo poster: fotos con bordes blancos individuales */}
         <div className="flex-1 mt-6 flex items-center justify-center">
           <div className="w-full max-w-[1700px] rounded-md overflow-hidden shadow-2xl">
             <div className="grid grid-cols-3 grid-rows-2 gap-px bg-white">
@@ -68,7 +103,6 @@ function Register() {
           </div>
         </div>
 
-        {/* Copyright abajo */}
         <p className="text-slate-400 text-sm text-center">© 2026 Festa de Ouro · Todos os direitos reservados</p>
 
       </div>
@@ -147,9 +181,13 @@ function Register() {
               </div>
             </div>
 
-            <button type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 text-lg shadow-md">
-              Criar conta
+            {erro && (
+              <p className="text-red-500 text-sm text-center">{erro}</p>
+            )}
+
+            <button type="submit" disabled={carregando}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 text-lg shadow-md disabled:opacity-60">
+              {carregando ? 'Criando conta...' : 'Criar conta'}
             </button>
 
           </form>
