@@ -1,0 +1,103 @@
+[
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$6OWFpo7VfsVbJsVy6HjBFE$pH/0HnBqlLjI8myGqK165nH2KmxG4/Ly5OBud0HxGsw=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "testfesta@gmail.com",
+    "first_name": "TEST01",
+    "last_name": "",
+    "email": "testfesta@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-07-13T21:12:06.977Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$vYghownv3EvEJjfRn6uvCj$Y5RiK65zEJyA2rGEd3DGvrilev+secpwDIuVIhFWPVM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "testfesta02@gmail.com",
+    "first_name": "TEST02",
+    "last_name": "",
+    "email": "testfesta02@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-07-13T21:13:48.143Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.perfil",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "sobrenome": "FESTA",
+    "telefone": "(31) 99985-5555",
+    "republica": "testfesta@gmail.com"
+  }
+},
+{
+  "model": "users.perfil",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "sobrenome": "FESTA",
+    "telefone": "(31) 99985-5552",
+    "republica": "NOSTRAVAMUS"
+  }
+},
+{
+  "model": "posts.post",
+  "pk": 1,
+  "fields": {
+    "author": 1,
+    "title": "TEST01",
+    "description": "OI, TO FAZENDO O TEST01 UPDATE2",
+    "date": "2026-07-16T18:12:00Z",
+    "location": "CARPE DIEM",
+    "image": "",
+    "category": null,
+    "created_at": "2026-07-13T21:12:42.300Z",
+    "updated_at": "2026-07-14T17:40:07.590Z"
+  }
+},
+{
+  "model": "posts.post",
+  "pk": 3,
+  "fields": {
+    "author": 2,
+    "title": "test02",
+    "description": "TEST 02 UPDATE, DELETE, DIO CERTO",
+    "date": "2026-08-06T00:18:00Z",
+    "location": "MODA ANTIGA",
+    "image": "",
+    "category": null,
+    "created_at": "2026-07-13T21:15:00.177Z",
+    "updated_at": "2026-07-13T21:15:00.177Z"
+  }
+},
+{
+  "model": "posts.post",
+  "pk": 4,
+  "fields": {
+    "author": 1,
+    "title": "TEST03",
+    "description": "TEST03 MULTI CUENTAS",
+    "date": "2026-07-30T14:43:00Z",
+    "location": "AGUA NA BOCA",
+    "image": "",
+    "category": null,
+    "created_at": "2026-07-15T00:44:09.074Z",
+    "updated_at": "2026-07-15T00:44:09.074Z"
+  }
+}
+]
