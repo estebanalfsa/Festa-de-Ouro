@@ -3,12 +3,12 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import axios from 'axios'
 
-import img2 from '../assets/img_reg2.jpeg'
-import img3 from '../assets/img_reg3.jpg'
-import img4 from '../assets/img_reg4.jpeg'
+import img2 from '../assets/img_reg7.jpg'
+import img3 from '../assets/img_reg4.jpeg'
+import img4 from '../assets/img_reg3.jpg'
 import img5 from '../assets/img_reg5.jpg'
-import img6 from '../assets/img_reg6.jpg'
-import img7 from '../assets/img_reg1.jpeg'
+import img6 from '../assets/img_reg1.jpeg'
+import img7 from '../assets/img_reg6.jpg'
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -150,9 +150,13 @@ function Register() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">República</label>
-                <input type="text" name="republica" value={formData.republica} onChange={handleChange}
-                  placeholder="Ex: NosTravamus" required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition" />
+                <select name="republica" value={formData.republica} onChange={handleChange} required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-gray-700">
+                  <option value="">Selecione sua república</option>
+                  {['NosTravamus','Dominakana','Badalacao','Complexo','Mata Virgem','Taberna','SoFadinhas','171','Tonteria','Agua Na Boca','Moda Antiga','BatCaverna','Mistura Perfeita','Eclipse','Forasteiras','Nadave','Indiscreta','Mexicanas','Exilio','Alambique','Provincia','Flor de Liz','Tabu','Maternidade'].map(r => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

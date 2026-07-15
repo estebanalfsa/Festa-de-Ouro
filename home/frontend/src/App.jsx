@@ -4,6 +4,8 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import User from './pages/User'
 import Senha from './pages/Senha'
+import ResetSenha from './pages/ResetSenha'
+import PerfilPublico from './pages/PerfilPublico'
 import RutaProtegida from './components/RutaProtegida'
 
 function App() {
@@ -22,7 +24,9 @@ function App() {
             </RutaProtegida>
           }
         />
+        <Route path='/perfil/:id' element={<PerfilPublico />} />
         <Route path='/senha' element={<Senha />} />
+        <Route path='/resetar-senha/:code' element={<ResetSenha />} />
       </Routes>
     </BrowserRouter>
   );

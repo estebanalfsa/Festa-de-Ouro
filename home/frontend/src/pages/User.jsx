@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import PostCard from '../components/PostCard'
 
 const API = 'http://localhost:8000/api'
+const MEDIA_BASE = 'http://localhost:8000'
 
 function authHeader() {
   return { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
@@ -20,26 +22,43 @@ export default function User() {
   const [showModal, setShowModal] = useState(false)
   const [editingPost, setEditingPost] = useState(null)
   const [form, setForm] = useState({ ...emptyForm })
+  const [formImage, setFormImage] = useState(null)
+  const [formImagePreview, setFormImagePreview] = useState('')
   const [formErro, setFormErro] = useState('')
   const [formLoading, setFormLoading] = useState(false)
 
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [profileFoto, setProfileFoto] = useState(null)
+  const [profileFotoPreview, setProfileFotoPreview] = useState('')
+  const [profileBanner, setProfileBanner] = useState(null)
+  const [profileBannerPreview, setProfileBannerPreview] = useState('')
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileErro, setProfileErro] = useState('')
+
   const loadProfile = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/perfil/`, { headers: authHeader() })
       const d = res.data
+      const fotoUrl = d.foto ? (d.foto.startsWith('http') ? d.foto : `${MEDIA_BASE}${d.foto}`) : null
+      const bannerUrl = d.banner ? (d.banner.startsWith('http') ? d.banner : `${MEDIA_BASE}${d.banner}`) : null
       setUserProfile({
         userId: d.userId,
         name: d.nome,
         surname: d.sobrenome,
         username: `@${d.username}`,
-        avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(d.nome + ' ' + d.sobrenome),
-        coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
+        foto: fotoUrl,
+        banner: bannerUrl,
+        avatar: fotoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.nome + ' ' + d.sobrenome)}&background=334155&color=fff`,
+        coverImage: bannerUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80',
         republic: d.republica,
         joinedAt: new Date(d.dataJuncao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+        seguidores: d.seguidores_count ?? 0,
+        seguindo: d.seguindo_count ?? 0,
       })
+      localStorage.setItem('user_id', d.userId)
       return d.userId
     } catch {
       setErro('Não foi possível carregar o perfil')
@@ -69,6 +88,8 @@ export default function User() {
   const openCreate = () => {
     setEditingPost(null)
     setForm({ ...emptyForm })
+    setFormImage(null)
+    setFormImagePreview('')
     setFormErro('')
     setShowModal(true)
   }
@@ -81,6 +102,8 @@ export default function User() {
       date: post.date ? post.date.slice(0, 16) : '',
       location: post.location || '',
     })
+    setFormImage(null)
+    setFormImagePreview('')
     setFormErro('')
     setShowModal(true)
   }
@@ -89,7 +112,19 @@ export default function User() {
     setShowModal(false)
     setEditingPost(null)
     setForm({ ...emptyForm })
+    setFormImage(null)
+    setFormImagePreview('')
     setFormErro('')
+  }
+
+  const handleFormImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setFormImage(file)
+      const reader = new FileReader()
+      reader.onloadend = () => setFormImagePreview(reader.result)
+      reader.readAsDataURL(file)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -97,10 +132,17 @@ export default function User() {
     setFormErro('')
     setFormLoading(true)
     try {
+      const fd = new FormData()
+      fd.append('title', form.title)
+      fd.append('description', form.description)
+      fd.append('date', form.date)
+      if (form.location) fd.append('location', form.location)
+      if (formImage) fd.append('image', formImage)
+
       if (editingPost) {
-        await axios.put(`${API}/posts/${editingPost.id}/`, form, { headers: authHeader() })
+        await axios.put(`${API}/posts/${editingPost.id}/`, fd, { headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' } })
       } else {
-        await axios.post(`${API}/posts/`, form, { headers: authHeader() })
+        await axios.post(`${API}/posts/`, fd, { headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' } })
       }
       closeModal()
       if (userProfile) await loadPosts(userProfile.userId)
@@ -127,6 +169,52 @@ export default function User() {
 
   const handleField = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }))
 
+  const handleFotoChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setProfileFoto(file)
+      const reader = new FileReader()
+      reader.onloadend = () => setProfileFotoPreview(reader.result)
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleBannerChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setProfileBanner(file)
+      const reader = new FileReader()
+      reader.onloadend = () => setProfileBannerPreview(reader.result)
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault()
+    setProfileErro('')
+    setProfileLoading(true)
+    try {
+      const fd = new FormData()
+      if (profileFoto) fd.append('foto', profileFoto)
+      if (profileBanner) fd.append('banner', profileBanner)
+      await axios.patch(`${API}/perfil/`, fd, { headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' } })
+      setShowProfileModal(false)
+      setProfileFoto(null)
+      setProfileFotoPreview('')
+      setProfileBanner(null)
+      setProfileBannerPreview('')
+      await loadProfile()
+    } catch {
+      setProfileErro('Erro ao atualizar perfil.')
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  const handlePostUpdate = () => {
+    if (userProfile) loadPosts(userProfile.userId)
+  }
+
   if (carregando) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -145,8 +233,8 @@ export default function User() {
 
   const stats = [
     { label: 'Eventos criados', value: userPosts.length },
-    { label: 'Presenças', value: 0 },
-    { label: 'Seguidores', value: 0 },
+    { label: 'Seguidores', value: userProfile?.seguidores ?? 0 },
+    { label: 'Seguindo', value: userProfile?.seguindo ?? 0 },
     { label: 'Gostos recebidos', value: 0 }
   ]
 
@@ -179,9 +267,16 @@ export default function User() {
 
       <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6">
         <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="h-56 sm:h-72 bg-slate-900 relative">
+          <div className="h-56 sm:h-72 bg-slate-900 relative group">
             <img src={userProfile.coverImage} alt="Cover" className="absolute inset-0 h-full w-full object-cover opacity-65" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent" />
+            <button
+              onClick={() => setShowProfileModal(true)}
+              className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Alterar banner"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </button>
             <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <span className="inline-flex items-center rounded-full bg-amber-500/90 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-950">Conta pessoal</span>
@@ -195,7 +290,16 @@ export default function User() {
             <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-                  <img src={userProfile.avatar} alt={userProfile.name} className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover ring-4 ring-white shadow-lg" />
+                  <div className="relative group">
+                    <img src={userProfile.avatar} alt={userProfile.name} className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover ring-4 ring-white shadow-lg" />
+                    <button
+                      onClick={() => setShowProfileModal(true)}
+                      className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex items-center justify-center text-white"
+                      title="Alterar foto"
+                    >
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </button>
+                  </div>
                   <div className="pb-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-2xl font-black text-slate-900">{userProfile.name} {userProfile.surname}</h3>
@@ -271,33 +375,14 @@ export default function User() {
                         <button onClick={openCreate} className="mt-3 text-sm font-semibold text-orange-500 hover:text-orange-600">Criar primeiro evento</button>
                       </div>
                     ) : userPosts.map((post) => (
-                      <article key={post.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="space-y-1 min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                                {new Date(post.created_at).toLocaleDateString('pt-BR')}
-                              </span>
-                              {post.location && (
-                                <span className="text-xs text-slate-400 flex items-center gap-1">
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                  {post.location}
-                                </span>
-                              )}
-                            </div>
-                            <h5 className="text-lg font-extrabold text-slate-900">{post.title}</h5>
-                            <p className="text-sm leading-relaxed text-slate-600">{post.description}</p>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button onClick={() => openEdit(post)} title="Editar" className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            </button>
-                            <button onClick={() => setDeleteTarget(post)} title="Excluir" className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
-                          </div>
-                        </div>
-                      </article>
+                      <PostCard
+                        key={post.id}
+                        post={post}
+                        editable
+                        onEdit={openEdit}
+                        onDelete={(p) => setDeleteTarget(p)}
+                        onUpdate={handlePostUpdate}
+                      />
                     ))}
                   </div>
                 )}
@@ -367,6 +452,24 @@ export default function User() {
                   <input type="text" value={form.location} onChange={handleField('location')} placeholder="Opcional" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm" />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imagem (opcional)</label>
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    Escolher imagem
+                    <input type="file" accept="image/*" onChange={handleFormImageChange} className="hidden" />
+                  </label>
+                  {formImage && (
+                    <button type="button" onClick={() => { setFormImage(null); setFormImagePreview('') }} className="text-sm text-red-500 hover:text-red-600">Remover</button>
+                  )}
+                </div>
+                {formImagePreview && (
+                  <div className="mt-2 rounded-lg overflow-hidden border border-slate-200">
+                    <img src={formImagePreview} alt="Preview" className="w-full h-40 object-cover" />
+                  </div>
+                )}
+              </div>
               {formErro && <p className="text-red-500 text-sm text-center">{formErro}</p>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={closeModal} className="flex-1 border border-gray-300 text-gray-700 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition text-sm">Cancelar</button>
@@ -391,6 +494,63 @@ export default function User() {
                 {deleteLoading ? 'Excluindo...' : 'Excluir'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => { if (!profileLoading) { setShowProfileModal(false); setProfileFoto(null); setProfileFotoPreview(''); setProfileBanner(null); setProfileBannerPreview('') } }} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-slate-800">Editar Perfil</h2>
+              <button onClick={() => { setShowProfileModal(false); setProfileFoto(null); setProfileFotoPreview(''); setProfileBanner(null); setProfileBannerPreview('') }} className="text-gray-400 hover:text-gray-600 transition">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleProfileUpdate} className="p-6 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Foto de perfil</label>
+                <div className="flex items-center gap-4">
+                  <img
+                    src={profileFotoPreview || userProfile.avatar}
+                    alt="Preview"
+                    className="w-20 h-20 rounded-2xl object-cover ring-2 ring-slate-200"
+                  />
+                  <label className="cursor-pointer flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    Trocar foto
+                    <input type="file" accept="image/*" onChange={handleFotoChange} className="hidden" />
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Foto de banner</label>
+                <div className="space-y-2">
+                  <div className="h-24 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                    <img
+                      src={profileBannerPreview || userProfile.coverImage}
+                      alt="Banner Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    Trocar banner
+                    <input type="file" accept="image/*" onChange={handleBannerChange} className="hidden" />
+                  </label>
+                </div>
+              </div>
+              {profileErro && <p className="text-red-500 text-sm text-center">{profileErro}</p>}
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => { setShowProfileModal(false); setProfileFoto(null); setProfileFotoPreview(''); setProfileBanner(null); setProfileBannerPreview('') }} disabled={profileLoading} className="flex-1 border border-gray-300 text-gray-700 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition text-sm">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={profileLoading || (!profileFoto && !profileBanner)} className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm">
+                  {profileLoading ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

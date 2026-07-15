@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
 import PostCard from '../components/PostCard'
+import SearchBar from '../components/SearchBar'
 
 export default function Home() {
   const { isGuest, logout, token, login } = useAuth()
@@ -34,6 +35,8 @@ export default function Home() {
   const [createDesc, setCreateDesc] = useState('')
   const [createDate, setCreateDate] = useState('')
   const [createLocation, setCreateLocation] = useState('')
+  const [createImage, setCreateImage] = useState(null)
+  const [createImagePreview, setCreateImagePreview] = useState('')
   const [erroCreate, setErroCreate] = useState('')
   const [loadingCreate, setLoadingCreate] = useState(false)
 
@@ -52,7 +55,10 @@ export default function Home() {
       axios.get('http://localhost:8000/api/perfil/', {
         headers: { Authorization: `Bearer ${token}` }
       })
-        .then(res => setNomeUsuario(`${res.data.nome} ${res.data.sobrenome}`.trim()))
+        .then(res => {
+          setNomeUsuario(`${res.data.nome} ${res.data.sobrenome}`.trim())
+          localStorage.setItem('user_id', res.data.userId)
+        })
         .catch(() => setNomeUsuario(''))
     }
   }, [isGuest, token])
@@ -120,24 +126,37 @@ export default function Home() {
     setErroCreate('')
     setLoadingCreate(true)
     try {
-      await axios.post('http://localhost:8000/api/posts/', {
-        title: createTitle,
-        description: createDesc,
-        date: createDate,
-        location: createLocation,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
+      const fd = new FormData()
+      fd.append('title', createTitle)
+      fd.append('description', createDesc)
+      fd.append('date', createDate)
+      if (createLocation) fd.append('location', createLocation)
+      if (createImage) fd.append('image', createImage)
+      await axios.post('http://localhost:8000/api/posts/', fd, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       })
       setShowCreateModal(false)
       setCreateTitle('')
       setCreateDesc('')
       setCreateDate('')
       setCreateLocation('')
+      setCreateImage(null)
+      setCreateImagePreview('')
       fetchPosts()
     } catch {
       setErroCreate('Erro ao criar evento. Verifique os dados.')
     } finally {
       setLoadingCreate(false)
+    }
+  }
+
+  const handleCreateImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setCreateImage(file)
+      const reader = new FileReader()
+      reader.onloadend = () => setCreateImagePreview(reader.result)
+      reader.readAsDataURL(file)
     }
   }
 
@@ -164,6 +183,9 @@ export default function Home() {
               <p className="text-slate-400 text-xs hidden sm:block">A rede dos seus eventos favoritos</p>
             </div>
           </div>
+
+          {/* Buscador */}
+          <SearchBar />
 
           {/* Botones de acción y perfil en el Header*/}
           <div className="flex items-center gap-4">
@@ -472,6 +494,29 @@ export default function Home() {
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-sm"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Imagem (opcional)</label>
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Escolher imagem
+                    <input type="file" accept="image/*" onChange={handleCreateImageChange} className="hidden" />
+                  </label>
+                  {createImage && (
+                    <button type="button" onClick={() => { setCreateImage(null); setCreateImagePreview('') }} className="text-sm text-red-500 hover:text-red-600">
+                      Remover
+                    </button>
+                  )}
+                </div>
+                {createImagePreview && (
+                  <div className="mt-2 rounded-lg overflow-hidden border border-slate-200">
+                    <img src={createImagePreview} alt="Preview" className="w-full h-40 object-cover" />
+                  </div>
+                )}
               </div>
 
               {erroCreate && <p className="text-red-500 text-sm text-center">{erroCreate}</p>}
